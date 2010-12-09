@@ -1,0 +1,7 @@
+architecture
+        processing_element_list 2
+                processing_element freq 300000000 send_cost 0 1 copy_cost 0 0 performance_factor 1.000000e+00 area 1.000000e-06 end_processing_element
+                processing_element freq 300000000 send_cost 0 1 copy_cost 0 0 performance_factor 1.000000e+00 area 1.000000e-06 end_processing_element
+        interconnect_list 2
+                interconnect 200000000 2.000000e-07 32 8 end_interconnect
+                interconnect 200000000 2.000000e-07 32 8 end_interconnect
