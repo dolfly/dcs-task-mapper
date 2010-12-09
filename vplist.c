@@ -1,3 +1,7 @@
+/*
+ * vplist module (including its header) is in Public Domain. No copyrights
+ * are claimed. The original author is Heikki Orsila <heikki.orsila@iki.fi>.
+ */
 #include <assert.h>
 #include <stdlib.h>
 
