@@ -9,7 +9,7 @@ MODULES=arch.o arexbasic.o bruteforce.o datastructures.o fast_premapping.o \
 	randommapping.o vplist.o
 BASICDEPS=arexbasic.h arextypes.h schedule.h vplist.h support.h
 
-all:	arex
+all:	taskmapper
 
 .SUFFIXES: .c .o
 
@@ -17,7 +17,7 @@ test:
 	@echo "error: use test.sh"
 	@false
 
-arex:	$(MODULES)
+taskmapper:	$(MODULES)
 	$(CC) -o $@ $(MODULES) $(LDFLAGS)
 
 .c.o:	
@@ -51,4 +51,4 @@ task.o:	task.c task.h $(BASICDEPS)
 vplist.o: vplist.c vplist.h
 
 clean:	
-	rm -f *.o arex
+	rm -f *.o taskmapper

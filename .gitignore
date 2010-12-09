@@ -1,6 +1,8 @@
-arex
+taskmapper
 Makefile
 inputfile*
 *.o
 *~
+stdinttest
+stdinttest.c
 
