@@ -1,0 +1,45 @@
+DCS task mapper is a tool that does task mapping (placement) and scheduling
+for multiprocessor systems.
+
+The tool (taskmapper) contains several things:
+
+* Optimizes an application presented as a task graph to minimize an arbitrary
+  cost function
+  - Usually the cost is the execution time of the application
+
+* Provides several mapping algorithms:
+  - Simulated Annealing algorithms (stochastic)
+  - Genetic algorithms (stochastic)
+  - Random mapping (Monte Carlo)
+  - Group migration (Deterministic greedy)
+  - Brute force algorithm (optimal solution but exponential time)
+  - Optimal subset mapping (fast semi-greedy algorithm)
+
+* Several application types are supported:
+  - Directed acyclic graphs (DAGs)
+  - Kahn process networks (http://en.wikipedia.org/wiki/Kahn_Process_Network)
+
+* Virtual time schedule simulator to test algorithms
+
+* Provides several scheduling algorithms
+  - DAGs: Critical path first
+  - KPNs: FIFO, static priority task scheduling
+
+The tool works as a command line filter that reads input from standard
+input and produces results on the standard output.
+
+== Example: configure, build and test the program ==
+
+$ ./configure
+$ make
+$ cat example/arch-b-dd example/kpn-cyclic-32-1 example/opt_optime_sa_autotemp |taskmapper
+
+The results is an optimization result from a Simulated Annealing algorithm
+for a KPN with 32 nodes on 2 processor virtual platform.
+
+== Disclaimer ==
+
+DCS task mapper project was started as a part of the DACI research group
+at Tampere University of Technology (Computer Systems Department):
+
+http://www.tkt.cs.tut.fi/research/daci/
