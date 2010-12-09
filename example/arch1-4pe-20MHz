@@ -1,0 +1,8 @@
+architecture
+	processing_element_list	4
+		processing_element freq 50000000 send_cost 0 0 copy_cost 0 0
+		processing_element freq 50000000 send_cost 0 0 copy_cost 0 0
+		processing_element freq 50000000 send_cost 0 0 copy_cost 0 0
+		processing_element freq 50000000 send_cost 0 0 copy_cost 0 0
+	interconnect_list	1
+		interconnect	20000000 0.000001 32 8 end_interconnect

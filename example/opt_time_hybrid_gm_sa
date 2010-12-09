@@ -1,0 +1,10 @@
+optimization
+       objective_function      execution_time
+       method hybrid_gm_sa
+               max_rejects     -1
+               schedule_max    -1
+               T0              1.0
+               Tf              0.0001
+               acceptor	       exponential
+               schedule geometric 0.95
+               heuristics      rm

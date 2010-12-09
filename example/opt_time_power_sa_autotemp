@@ -1,0 +1,11 @@
+optimization
+	objective_function execution_time_power
+		k 1
+	method simulated_annealing_autotemp
+               max_rejects     -1
+               schedule_max    -1
+               T0              1.0
+               Tf              0.0001
+               acceptor	       exponential
+               schedule geometric 0.95
+               heuristics      rm

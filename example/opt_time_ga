@@ -1,0 +1,10 @@
+optimization
+	objective_function	execution_time
+	method genetic_algorithm
+                max_generations                 1000
+                population_size                 100
+                elitism                         10
+		crossover_probability           1.0
+		chromosome_mutation_probability 1.0
+                gene_mutation_probability       0.01
+        end_opt_parameters

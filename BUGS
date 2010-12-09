@@ -1,0 +1,4 @@
+
+ - edge scheduling priority is bugged in schedule.c. Communication cost
+   should be added to each b-level value of any child before doing comparison.
+	* Note, does not affect Kahn Process Networks

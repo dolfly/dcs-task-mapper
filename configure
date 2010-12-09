@@ -1,0 +1,100 @@
+#!/bin/sh
+
+packageprefix=""
+compiler="gcc"
+linker="ld"
+libdir=""
+prefix=/usr/local
+
+if test -n "$CC" ; then
+    compiler="$CC"
+fi
+
+for opt in "$@" ; do
+	case $opt in
+	--prefix=*)
+		prefix=`echo $opt | sed -n 's/--prefix=\(.*\)/\1/p'`
+		;;
+	--package-prefix=*)
+		packageprefix="`echo $opt | sed -n 's|--package-prefix=\(.*\)|\1|p'`"
+		;;
+	--compiler=*)
+		compiler="`echo $opt | sed -n 's|--compiler=\(.*\)|\1|p'`"
+		;;
+	--python=*)
+		python="`echo $opt | sed -n 's|--python=\(.*\)|\1|p'`"
+		;;
+	--libdir=*)
+		libdir="`echo $opt | sed -n 's|--lib-dir=\(.*\)|\1|p'`"
+		;;
+	--help)
+		echo ""
+		echo "valid options are:"
+		echo " --prefix=dir           Select install prefix. Default is HOME/koski"
+ 		echo " --package-prefix=dest  Pretend to install to the prefix, but copy files to"
+                echo "                        'dest/prefix' on make install"
+		echo " --compiler=program     compile with 'program' (gcc)"
+		echo " --libdir=dir           Select library directory. The default is PREFIX/lib."
+		echo " --python=prog          Select python interpreter."
+		exit
+		;;
+        *)
+		echo "unknown configure argument:" "$opt" "(ignoring)"
+		;;
+	esac
+done
+
+if test -n "$packageprefix" ; then
+    packageprefix="$packageprefix/"
+fi
+
+bindir="$prefix/bin"
+
+packagebindir="$packageprefix$bindir"
+
+if test -z "$libdir" ; then
+    libdir="$prefix/lib"
+fi
+
+rm -f stdint.h
+cat > stdinttest.c <<EOF
+#include <stdint.h>
+int main(void) {uint8_t a = 0; uint32_t b = 0; uint64_t c = 0; return 0; }
+EOF
+gcc -o stdinttest stdinttest.c 2>/dev/null
+if test "$?" != "0" ; then
+    echo "#include <inttypes.h>" > stdint.h
+    echo "Warning: stdint.h is missing (needed for portable types)"
+    echo ""
+fi
+
+exepostfix=""
+os="`( uname -o 2>/dev/null || echo Unsupported )`"
+if test "$os" = "Cygwin" ; then
+    exepostfix=".exe"
+elif test "$os" = "Unsupported" ; then
+    os="`uname`"
+    if test "$os" = "SunOS" ; then
+	echo "Tough luck. Solaris is not supported. Arex could be fixed, though."
+    fi
+fi
+
+for file in Makefile.in ; do
+    dst="`echo $file |sed -e "s|\.in||"`"
+    sed -e "s|{BINDIR}|$packagebindir|g" \
+	-e "s|{CC}|$compiler|g" \
+	-e "s|{LD}|$linker|g" \
+	-e "s|{CFLAGS}|$CFLAGS|g" \
+	-e "s|{LIBDIR}|$libdir/staticarex|g" \
+	-e "s|{EXEPOSTFIX}|$exepostfix|g" \
+	< "$file" > "$dst"
+done
+
+echo ""
+echo "  Prefix directory:          $prefix"
+echo "  Package prefix:            $packageprefix"
+echo "  Binary directory:          $bindir"
+echo "  Library directory:         $libdir"
+echo "  Compiler:                  $compiler"
+echo ""
+echo "Configure succesful."

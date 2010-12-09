@@ -1,0 +1,7 @@
+optimization
+	objective_function	execution_time
+	method random_mapping
+		max_iterations	10000
+		multiplier	1
+		task_exponent	2
+		pe_exponent	2

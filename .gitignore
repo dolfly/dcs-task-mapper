@@ -1,0 +1,6 @@
+arex
+Makefile
+inputfile*
+*.o
+*~
+

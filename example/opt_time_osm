@@ -1,0 +1,7 @@
+optimization
+	objective_function	execution_time
+	method optimal_subset_mapping
+		multiplier	1.0
+		task_exponent	1.0
+		pe_exponent	1.0
+		subset_size	0

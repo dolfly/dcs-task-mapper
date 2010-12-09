@@ -1,0 +1,73 @@
+2006-05-23  Heikki Orsila <heikki.orsila@tut.fi>
+	- Added a result print (T,c) where T is temperature and c is cost to
+	  measure progress of simulated annealing. The print is tagged
+	  "best_cost_so_far".
+
+2005-09-06  Heikki Orsila <heikki.orsila@tut.fi>
+	- Fixed a non-fatal (by luck) bug in ae_print_mapping_balance() that
+	  indexed out of bounds on target_pes table. Target_pes was allocated
+	  to be of size ntasks but it should have been of size npes. In all
+	  test cases so far ntasks was higher than npes so no problem occured.
+	
+2005-08-28  Heikki Orsila <heikki.orsila@tut.fi>
+	- Fixed the b-level scheduler. It could have chosen a wrong path
+	  when choosing the path with highest b-level value, and it probably
+	  did. Although I didn't see the fix improve execution time
+	  noticeably.
+	- Wrote arexanalyzer.py. It analyzes outputs of arex program. It lets
+	  user decide on interesting properties, and then selects that data
+	  from the given data set. Example:
+	    echo MARK task_graph_file
+	    arexrun1 >> resultfile
+	    echo MARK task_graph_file
+	    arexrun2 >> resultfile
+	    ...
+	    echo MARK task_graph_file
+	    arexrun100 >> resultfile
+	    arexanalyzer.py --objective_function="execution_time" --optimization_method="simulated_annealing" --sa_heuristics="rm" --ntasks="52" --pes="2" --summary="summaryfile" resultfile
+	  Now "summaryfile" contains statistics on arex runs.
+	- Added random mapping heuristics
+	- Modularized heuritics parameters in optimization.[ch]. Different
+	  mapping heuristics share the same variable in struct ae_optimization.
+	  (struct ae_optimization foo.params)
+	- All mapping heuristics do
+	    fprintf(stderr, "accepted_objective: %.9lf\n", bestcost)
+	  to indicate the best objective value so far. This feature is useful
+	  for plotting optimization progress.
+	- Wrote an initial version of contrib/arex-import-xsm.py that imports
+	  xsm models from Koski design flow. It still lacks graph generation,
+	  because current arex doesn't support probabilistic triggers for
+	  tasks.
+	- Lots of other changes changes
+
+2005-08-05  Heikki Orsila <heikki.orsila@tut.fi>
+	- Using getrusage() to determine how much CPU time arex process has
+	  from the kernel.
+
+2005-07-26  Heikki Orsila <heikki.orsila@tut.fi>
+	- Finished first version of full memory tracking. It will probably
+	  break in the future due to complexity of schedule.c.
+
+2005-07-25  Heikki Orsila <heikki.orsila@tut.fi>
+	- Tedious work on schedulers memory reference counting. Need to
+	  keep track of memory allocated for input and output of tasks.
+	  This gets complicated when each task computes many results, and
+	  each result is divided into many partitions. Each partitions is
+	  sent to exactly one target PE.
+
+2005-06-19  Heikki Orsila <heikki.orsila@tut.fi>
+	- fixed a very serious bug in memory allocation macros. always use ()
+	  over variables in #defines. following macro was buggy in a very
+	  serious way (see arexbasic.h):
+
+	  #define MALLOC_ARRAY(array, n) do { array = malloc(sizeof(array[0]) * n); } while(0)
+
+	  Now MALLOC_ARRAY(array, amount + 1) would allocate only
+                1 + amount * sizeof(array[0])
+          bytes, instead of
+	        (1 + amount) * sizeof(array[0])
+
+2005-06-04  Heikki Orsila <heikki.orsila@tut.fi>
+	- initial changelog entry. rewriting the python optimizer.
+
+	

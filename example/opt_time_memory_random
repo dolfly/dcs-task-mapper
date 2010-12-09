@@ -1,0 +1,7 @@
+optimization
+	objective_function	execution_time_memory
+	method random_mapping
+		max_iterations	-1
+		multiplier	1
+		task_exponent	2
+		pe_exponent	2

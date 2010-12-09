@@ -1,0 +1,58 @@
+tasks
+	task_list 52
+		task	0 out 1 64 12 1 2 3 4 7 9 12 14 15 16 35 44 weight 64
+		task	1 out 1 64 3 5 23 42 weight 576
+		task	2 out 1 64 3 10 40 46 weight 256
+		task	3 out 1 64 1 51 weight 192
+		task	4 out 1 64 2 34 40 weight 384
+		task	5 out 1 64 2 6 26 weight 256
+		task	6 out 1 64 8 8 10 13 18 28 30 41 42 weight 192
+		task	7 out 1 64 6 21 24 29 39 40 46 weight 192
+		task	8 out 1 64 3 10 17 28 weight 512
+		task	9 out 1 64 1 11 weight 576
+		task	10 out 1 64 4 17 20 37 43 weight 128
+		task	11 out 1 64 2 23 30 weight 64
+		task	12 out 1 64 3 20 26 27 weight 640
+		task	13 out 1 64 4 19 22 27 28 weight 640
+		task	14 out 1 64 5 20 25 28 32 40 weight 192
+		task	15 out 1 64 6 21 30 41 43 46 47 weight 64
+		task	16 out 1 64 3 20 34 47 weight 576
+		task	17 out 1 64 1 51 weight 256
+		task	18 out 1 64 1 37 weight 128
+		task	19 out 1 64 1 20 weight 384
+		task	20 out 1 64 3 36 47 50 weight 512
+		task	21 out 1 64 1 38 weight 64
+		task	22 out 1 64 2 34 43 weight 640
+		task	23 out 1 64 3 33 46 48 weight 128
+		task	24 out 1 64 2 36 45 weight 384
+		task	25 out 1 64 1 46 weight 192
+		task	26 out 1 64 2 30 41 weight 128
+		task	27 out 1 64 3 31 39 45 weight 512
+		task	28 out 1 64 2 39 48 weight 256
+		task	29 out 1 64 1 48 weight 320
+		task	30 out 1 64 3 38 43 49 weight 256
+		task	31 out 1 64 1 51 weight 384
+		task	32 out 1 64 2 39 50 weight 576
+		task	33 out 1 64 1 47 weight 384
+		task	34 out 1 64 1 51 weight 64
+		task	35 out 1 64 1 41 weight 576
+		task	36 out 1 64 1 38 weight 448
+		task	37 out 1 64 3 39 41 45 weight 64
+		task	38 out 1 64 1 51 weight 64
+		task	39 out 1 64 1 49 weight 448
+		task	40 out 1 64 1 48 weight 320
+		task	41 out 1 64 2 46 48 weight 128
+		task	42 out 1 64 1 51 weight 320
+		task	43 out 1 64 1 51 weight 576
+		task	44 out 1 64 1 47 weight 384
+		task	45 out 1 64 1 51 weight 384
+		task	46 out 1 64 2 49 50 weight 320
+		task	47 out 1 64 1 49 weight 384
+		task	48 out 1 64 1 51 weight 128
+		task	49 out 1 64 1 51 weight 576
+		task	50 out 1 64 1 51 weight 640
+		task	51 out 0 weight 64
+	default_mapping	0
+	mapping_list 2
+		map 0 0 map 51 0
+	static_list 2 0 51
