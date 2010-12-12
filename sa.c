@@ -48,9 +48,10 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 			 struct ae_mapping *S0, double T,
 			 struct ae_sa_parameters *params)
 {
-	int k = 0, rejects = 0;
+	int k = 0;
+	int rejects = 0;
 	double E, E_best, E_new;
-	struct ae_mapping *S, *S_best, *S_next;
+	struct ae_mapping *S, *S_best, *S_new;
 	size_t level = 0;
 	int levelrecorded = 0;
 	int npes = S0->arch->npes;
@@ -65,7 +66,7 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 	E_best = E;
 	S = ae_fork_mapping(S0);
 	S_best = ae_fork_mapping(S0);
-	S_next = ae_fork_mapping(S0);
+	S_new = ae_fork_mapping(S0);
 
 	while (1) {
 		fprintf(stderr, "accepted_objective: %.9lf\n", E);
@@ -92,22 +93,22 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 		if (params->maxpes)
 			S0->arch->npes = params->maxpes;
 
-		params->move(S_next, S, T, os);
+		params->move(S_new, S, T, os);
 
 		/* Restore the number of PEs */
 		if (params->maxpes)
 			S0->arch->npes = npes;
 
-		E_new = params->objective(S_next);
+		E_new = params->objective(S_new);
 
 		append_optstate_move(os, E, E_new);
 
 		if (E_new < E || ae_randd(0, 1.0) < params->acceptor(E_new - E, T, params)) {
-			ae_copy_mapping(S, S_next);
+			ae_copy_mapping(S, S_new);
 			E = E_new;
 
 			if (E_new < E_best) {
-				ae_copy_mapping(S_best, S_next);
+				ae_copy_mapping(S_best, S_new);
 				E_best = E_new;
 				printf("best_sa_cost_so_far: %e %lld %.9f %.3f %.2f %.9f\n", T, S->result->evals, E_best, params->ref_E / E_best, S->schedule->arbavginqueue, S->schedule->arbavgtime);
 			}
@@ -151,7 +152,7 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 	fprintf(stderr, "simulated annealing ends. T: %f k: %d\n", T, k);
 
 	ae_free_mapping(S);
-	ae_free_mapping(S_next);
+	ae_free_mapping(S_new);
 
 	free_optstate(os);
 
