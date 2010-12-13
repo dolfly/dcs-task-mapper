@@ -32,10 +32,10 @@ input and produces results on the standard output.
 
 $ ./configure
 $ make
-$ cat example/arch-b-dd example/kpn-cyclic-32-1 example/opt_optime_sa_autotemp |taskmapper
+$ cat example/arch-b-dd example/kpn-cyclic-32-1 example/opt_optime_sa_autotemp |./taskmapper
 
 The results is an optimization result from a Simulated Annealing algorithm
-for a KPN with 32 nodes on 2 processor virtual platform.
+for a KPN with 32 nodes on a 2 processor virtual platform.
 
 == Disclaimer ==
 
