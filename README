@@ -1,5 +1,12 @@
+== DCS task mapper ==
+
 DCS task mapper is a tool that does task mapping (placement) and scheduling
 for multiprocessor systems.
+
+See COPYING file for licensing information.
+See AUTHORS file for copyright information.
+
+== Introduction ==
 
 The tool (taskmapper) contains several things:
 
