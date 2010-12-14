@@ -68,6 +68,11 @@ if test "$?" != "0" ; then
     echo ""
 fi
 
+version=$(cat version)
+cat > version.h <<EOF
+#define AE_VERSION "$version"
+EOF
+
 exepostfix=""
 os="`( uname -o 2>/dev/null || echo Unsupported )`"
 if test "$os" = "Cygwin" ; then

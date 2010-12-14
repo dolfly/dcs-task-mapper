@@ -33,6 +33,7 @@
 #include "result.h"
 #include "sa.h"
 #include "support.h"
+#include "version.h"
 
 void print_usage(void)
 {
@@ -54,6 +55,7 @@ void print_usage(void)
 "                                     a file. (not portable data)\n"
 "-p str, --parameter=str,             Pass a parameter string for the\n"
 "                                     optimization algorithm.\n"
+"-v, --version,                       Print program version\n"
 		);
 }
 
@@ -75,10 +77,11 @@ int main(int argc, char **argv)
 		{"list-mapping-heuristics", 0, NULL, 'l'},
 		{"mapping-heuristics", 1, NULL, 'm'},
 		{"parameter", 1, NULL, 'p'},
+		{"version", 0, NULL, 'v'},
 		{NULL, 0, NULL, 0}
 	};
 
-	while ((ret = getopt_long(argc, argv, "a:fhi:lm:o:p:", long_options, NULL)) != -1) {
+	while ((ret = getopt_long(argc, argv, "a:fhi:lm:o:p:v", long_options, NULL)) != -1) {
 		switch (ret) {
 
 		case 'a':
@@ -123,7 +126,9 @@ int main(int argc, char **argv)
 				parvalue = "";
 			ae_config_append_parameter(parname, parvalue);
 			break;
-
+		case 'v':
+			printf("DCS task mapper version %s\n", AE_VERSION);
+			exit(0);
 		case '?':
 		case ':':
 			ae_err("\n");
