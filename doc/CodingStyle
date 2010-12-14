@@ -1,0 +1,9 @@
+The intended coding style the project is the Linux kernel coding style.
+
+The correct style is K&R with 8 column indentation by using tabs.
+Tab means 8 columns.
+
+However, there are many old code modules that use 2 column indentation.
+These modules will be gradually moved to the Linux kernel style
+(8 column indentation).
+
