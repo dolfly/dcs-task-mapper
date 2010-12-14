@@ -1,0 +1,14 @@
+#!/bin/sh
+
+v=$1
+name=$1
+if test -z "$v" ; then
+   v="HEAD"
+   name=$(date +%F)
+fi
+
+if test -n "$(echo $name |grep '^v')" ; then
+    name=$(echo $name |sed -e "s|^v\(.*\)|\1|")
+fi
+
+git archive --prefix="dcs-task-mapper-$name/" "$v" |bzip2 > "dcs-task-mapper-$name.tar.bz2"
