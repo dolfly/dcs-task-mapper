@@ -1,0 +1,75 @@
+== Configure and build ==
+
+$ ./configure
+$ make
+
+This produces an executable file name ./taskmapper
+
+== Examples ==
+
+Task mapper reads input from standard input and produces results onto
+standard output.
+
+The input format consists of three sections:
+
+1. Architecture of the simulated HW system
+2. Task graph to be mappend and scheduled to the HW system
+3. Optimization method and parameters
+
+The input can be generated from examples by a following shell pattern:
+$ cd examples
+$ cat arch-b-dd kpn-cyclic-32-1 opt_time_sa_autotemp |../taskmapper 2>/dev/null
+
+The first argument to 'cat' command is the architecture file. The second
+is a Kahn Process Network (task graph), and the third is the
+Simulated Annealing optimization method and its parameters.
+
+There are several files in example/ directory that can be used for
+testing.
+
+=== Example 1: Map 32 node tasks onto 2 PEs with Simulated Annealing ===
+
+Optimize a 32 node task graph onto 2 PEs with Simulated Annealing:
+
+$ cd example
+$ cat 32-node-kpn-2-pe-sa-autotemp.job |../taskmapper 2>/dev/null
+
+This should run to completion in a few seconds.
+
+The files 32-node-kpn-2-pe-brute-force.{job|result} contains
+the same problem but optimzied with brute force. Th runs a very
+long time, maybe a week or so. The result file contains the
+global optimum reference value for gain (which is the speedup of
+the optimized application). The optimal gain is approximately 1.635.
+SA has converged to the global optimum if the output contains the
+following line: "gain: 1.635"
+
+The SA result is printed on the standard output. It should look
+something like this:
+
+pe: id 0 freq 300000000 perf 1.000000e+00 area 1.000000e-06
+pe: id 1 freq 300000000 perf 1.000000e+00 area 1.000000e-06
+interconnect: id 0 freq 200000000 area 2.000000e-07 width 32 latency 8 policy 0
+interconnect: id 1 freq 200000000 area 2.000000e-07 width 32 latency 8 policy 0
+...
+ntasks: 32
+pes: 2
+...
+initial_objective: 0.000875617		<- The initial cost function value
+initial_time: 0.000875617		<- Initial execution time
+	      				   (same as cost in this example)
+best_objective: 0.000558700		<- Optimized cost function value
+best_time: 0.000558700			<- Optimzied execution time
+	   				   (same as cost in this example)
+gain: 1.567				<- Gain, aka speedup in this example.
+                                           Gain is defined as initial objective
+					   divided by best objective.
+					   The optimized application runs 56.7%
+					   faster.
+time_gain: 1.567
+...
+evaluations: 1860			<- Number of evaluated mappings
+optimization_time: 0.472029		<- Optimization time in seconds
+		   			   as returned by getrusage (2)
+optimization_started: 2010-12-14 15:40:58
+optimization_ended: 2010-12-14 15:40:59
