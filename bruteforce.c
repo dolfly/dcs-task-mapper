@@ -131,7 +131,7 @@ struct ae_mapping *ae_brute_force(struct ae_mapping *oldmap, double initial, int
 		}
 
 		p = (i / maxi) * 100;
-		if (p != oldp || (i % 10000) == 0) {
+		if (p != oldp) {
 			oldp = p;
 			printf("p: %d%% i: %lld best_cost: %.9lf best_gain: %.3lf\n", p, i, bestcost, initial / bestcost);
 		}
