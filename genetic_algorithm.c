@@ -365,6 +365,8 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
     struct ae_mapping *S_best;
     double gini;
 
+    assert(!ae_config.find_maximum);
+
     /* Initialize data structures */
     population = create_population(S0, p);
 

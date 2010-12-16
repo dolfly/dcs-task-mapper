@@ -27,7 +27,7 @@
 #include "mapping.h"
 #include "arexbasic.h"
 #include "input.h"
-
+#include "optimization.h"
 
 struct ae_mapping *ae_osm(struct ae_mapping *map, struct ae_osm_parameters *p)
 {
@@ -95,7 +95,7 @@ struct ae_mapping *ae_osm(struct ae_mapping *map, struct ae_osm_parameters *p)
 
 			iteration++;
 
-			if (cost < bestcost) {
+			if (cost_diff(bestcost, cost) < 0) {
 				bestcost = cost;
 				ae_copy_mapping(bestmap, newmap);
 				printf("best_osm_cost_so_far %lld %d %lld %.9lf %.3f\n", round, subsetsize, iteration, bestcost, initialcost / bestcost);

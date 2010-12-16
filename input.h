@@ -12,6 +12,7 @@ struct arex_parameter {
 
 struct arex_config {
 	int fast_premapping;
+	int find_maximum; /* find maximum instead of minimum, if non-zero */
 	char *cmdline_optimization_parameter;
 	char *arbitration_policy;
 	char *ic_priorities;

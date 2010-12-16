@@ -123,6 +123,14 @@ void append_optstate_move(struct optstate *os, double old, double new)
 		os->ringused++;
 }
 
+double cost_diff(double old, double new)
+{
+	double diff = new - old;
+	if (ae_config.find_maximum)
+		diff = -diff;
+	return diff;
+}
+
 struct optstate *create_optstate(size_t ringsize)
 {
 	struct optstate *os;

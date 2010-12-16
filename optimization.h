@@ -42,6 +42,7 @@ struct ae_mapping *ae_optimize(struct ae_mapping *map);
 void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f);
 
 void append_optstate_move(struct optstate *os, double old, double new);
+double cost_diff(double old, double new);
 int opt_move_probabilities(struct optmoveprobabilities *ps, struct optstate *os);
 struct optstate *create_optstate(size_t ringsize);
 void free_optstate(struct optstate *os);

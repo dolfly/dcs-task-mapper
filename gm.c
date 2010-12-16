@@ -56,7 +56,7 @@ struct ae_mapping *ae_gm(struct ae_mapping *S0, int randomize)
     fprintf(stderr, "best cost: %.9lf\n", bestcost);
     S_new = ae_gm_round(S, round);
     newcost = S->optimization->objective(S_new);
-    if (newcost >= bestcost) {
+    if (cost_diff(bestcost, newcost) >= 0) {
       ae_free_mapping(S_new);
       break;
     }
@@ -139,7 +139,7 @@ static struct ae_mapping *ae_gm2_round(struct ae_mapping *S)
 	  S->mappings[t2] = p2;
 
 	  newcost = S->optimization->objective(S);
-	  if (newcost < bestcost) {
+	  if (cost_diff(bestcost, newcost) < 0) {
 	    bestcost = newcost;
 	    best_t1 = t1;
 	    best_p1 = p1;
@@ -193,7 +193,7 @@ static struct ae_mapping *ae_gm_round(struct ae_mapping *S0, int round)
 	fprintf(stderr, "accepted_objective: %.9lf\n", bestcost);
 	S->mappings[taskid] = pe;
 	newcost = S->optimization->objective(S);
-	if (newcost < bestcost) {
+	if (cost_diff(bestcost, newcost) < 0) {
 	  bestcost = newcost;
 	  besttask = taskid;
 	  bestpe = pe;

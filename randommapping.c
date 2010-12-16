@@ -64,7 +64,7 @@ struct ae_mapping *ae_random_mapping(struct ae_mapping *map, double initial)
 
     newcost = map->optimization->objective(newmap);
 
-    if (newcost < bestcost) {
+    if (cost_diff(bestcost, newcost) < 0) {
       bestcost = newcost;
       ae_copy_mapping(bestmap, newmap);
       print_progress = 1;

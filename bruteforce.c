@@ -24,6 +24,9 @@
 #include "optimization.h"
 #include "permutation.h"
 #include "arexbasic.h"
+#include "input.h"
+
+#include <assert.h>
 
 static void copy_permutation(struct ae_mapping *map, const struct permutation *p)
 {
@@ -96,6 +99,8 @@ struct ae_mapping *ae_brute_force(struct ae_mapping *oldmap, double initial, int
 	long long opti = 0;
 	double maxi = 1;
 	struct permutation *permutation = NULL;
+
+	assert(!ae_config.find_maximum);
 
 	if (flags & OPT_MAPPING) {
 		ae_zero_mapping(map);

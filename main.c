@@ -42,6 +42,8 @@ void print_usage(void)
 "\n"
 "-a p, --arb-policy=p,                Set IC arbitration policy\n"
 "-f, --fast-premapping,               Apply fast pre-mapping before optim.\n"
+"--find-maximum,                      Find maximum objective function value\n"
+"                                     instead of minimum\n"
 "-h, --help,                          Print help.\n"
 "-i s, --ic-priorities=s,             Set IC priorities as a string: s = 012..\n"
 "                                     where 0 is the priority for the first PE,\n"
@@ -68,6 +70,10 @@ int main(int argc, char **argv)
 	char *parname;
 	char *parvalue;
 
+	enum {
+		OPT_MAXIMUM = 1000,
+	};
+
 	struct option long_options[] = {
 		{"arb-policy", 1, NULL, 'a'},
 		{"fast-premapping", 0, NULL, 'f'},
@@ -76,6 +82,7 @@ int main(int argc, char **argv)
 		{"ic-priorities", 1, NULL, 'i'},
 		{"list-mapping-heuristics", 0, NULL, 'l'},
 		{"mapping-heuristics", 1, NULL, 'm'},
+		{"find-maximum", 0, NULL, OPT_MAXIMUM},
 		{"parameter", 1, NULL, 'p'},
 		{"version", 0, NULL, 'v'},
 		{NULL, 0, NULL, 0}
@@ -129,10 +136,12 @@ int main(int argc, char **argv)
 		case 'v':
 			printf("DCS task mapper version %s\n", AE_VERSION);
 			exit(0);
+		case OPT_MAXIMUM:
+			ae_config.find_maximum = 1;
+			break;
 		case '?':
 		case ':':
 			ae_err("\n");
-
 		default:
 			ae_err("unknown option\n");
 		}

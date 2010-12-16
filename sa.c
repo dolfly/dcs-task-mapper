@@ -76,6 +76,7 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 	int levelrecorded = 0;
 	int npes = S0->arch->npes;
 	struct optstate *os;
+	double diff;
 
 	os = create_optstate(20);
 
@@ -123,11 +124,12 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 
 		append_optstate_move(os, E, E_new);
 
-		if (E_new < E || ae_randd(0, 1.0) < params->acceptor(E_new - E, T, params)) {
+		diff = cost_diff(E, E_new);
+		if (diff < 0 || ae_randd(0, 1.0) < params->acceptor(diff, T, params)) {
 			ae_copy_mapping(S, S_new);
 			E = E_new;
 
-			if (E_new < E_best) {
+			if (cost_diff(E_best, E_new) < 0) {
 				ae_copy_mapping(S_best, S_new);
 				E_best = E_new;
 				printf("best_sa_cost_so_far: %e %lld %.9f %.3f %.2f %.9f\n", T, S->result->evals, E_best, params->ref_E / E_best, S->schedule->arbavginqueue, S->schedule->arbavgtime);
@@ -152,7 +154,7 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 			printf("best_sa_cost_so_far: %e %lld %.9f %.3f\n", T, S->result->evals, E_best, params->ref_E / E_best);
 			fflush(stdout);
 
-			T = params->schedule(T, k / params->schedule_max, params);
+			T = params->schedule(T, params);
 			
 			printf("Transition_prob: T %.6f 0.001 %.6f 0.010 %.6f 0.100 %.6f\n",
 			       T,
@@ -260,7 +262,7 @@ static double special_1_acceptor(double dE, double T, struct ae_sa_parameters *p
 	return MAX(0, 1 - dE / divisor);
 }
 
-double ae_sa_geometric_schedule(double T, int k, struct ae_sa_parameters *params)
+static double geometric_schedule(double T, struct ae_sa_parameters *params)
 {
 	return T * params->schedule_param1;
 }
@@ -345,7 +347,7 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
 			ret = ae_match_alternatives(schedules, f);
 			if (ret != 0)
 				ae_err("unknown sa schedule\n");
-			p->schedule = ae_sa_geometric_schedule;
+			p->schedule = geometric_schedule;
 			p->schedule_param1 = ae_get_double(f);
 			fprintf(stderr, "sa schedule: %s %lf\n", schedules[ret], p->schedule_param1);
 		} else if (!strcmp("heuristics", s)) {
