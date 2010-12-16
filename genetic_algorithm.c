@@ -361,7 +361,11 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 	double *selection_probability;
 	struct individual **population, **newpopulation;
 	struct ae_mapping *S_best;
+	double S_best_cost;
 	double gini;
+
+	S_best = ae_fork_mapping(S0);
+	S_best_cost = p->objective(S_best);
 
 	/* Initialize data structures */
 	population = create_population(S0, p);
@@ -374,6 +378,10 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 	for (generation = 0; generation < p->max_generations; generation++) {
 
 		qsort(population, p->population_size, sizeof(population[0]), fittest_first);
+		if (fitness_to_cost(population[0]->fitness) < S_best_cost) {
+			ae_copy_mapping(S_best, population[0]->map);
+			S_best_cost = fitness_to_cost(population[0]->fitness);
+		}
 
 		fitness_sum = 0.0;
 		best_fitness = 0.0;
@@ -420,7 +428,10 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 
 	/* Find the best individual */
 	qsort(population, p->population_size, sizeof(population[0]), fittest_first);
-	S_best = ae_fork_mapping(population[0]->map);
+	if (fitness_to_cost(population[0]->fitness) < S_best_cost) {
+			ae_copy_mapping(S_best, population[0]->map);
+			S_best_cost = fitness_to_cost(population[0]->fitness);
+	}
 
 	for (i = 0; i < p->population_size; i++)
 		free_individual(population[i]);
