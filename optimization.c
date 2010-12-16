@@ -122,7 +122,7 @@ int opt_move_probabilities(struct optmoveprobabilities *ps,
 	return 1;
 }
 
-static double log_objective(double obj, struct ae_mapping *map)
+static void log_objective(double obj, struct ae_mapping *map)
 {
   struct ae_result *r = map->result;
 
@@ -144,31 +144,30 @@ static double log_objective(double obj, struct ae_mapping *map)
 
     r->evals++;
   }
-
-  return obj;
 }
 
 
 static double default_objective(struct ae_mapping *map)
 {
-  map->appmodel->schedule(map);
-
-  return log_objective(map->schedule->schedule_length, map);
+	double obj;
+	map->appmodel->schedule(map);
+	obj = map->schedule->schedule_length;
+	log_objective(obj, map);
+	return obj;
 }
 
 
 static double time_power_objective(struct ae_mapping *map)
 {
-  double statE, dynE;
-
-  map->appmodel->schedule(map);
-
-  ae_energy(NULL, &statE, &dynE, map);
-
-  assert(statE >= 0.0);
-  assert(dynE >= 0.0);
-
-  return log_objective(statE + dynE, map);
+	double statE, dynE;
+	double obj;
+	map->appmodel->schedule(map);
+	ae_energy(NULL, &statE, &dynE, map);
+	assert(statE >= 0.0);
+	assert(dynE >= 0.0);
+	obj = statE + dynE;
+	log_objective(obj, map);
+	return obj;
 }
 
 
