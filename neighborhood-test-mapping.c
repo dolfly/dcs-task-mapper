@@ -129,6 +129,8 @@ struct ae_mapping *ae_neighborhood_test_mapping(struct ae_mapping *map, double i
 	struct lscounter *counter;
 	struct ae_ntm_parameters *p = map->optimization->params;
 
+	assert(!ae_config.find_maximum);
+
 	changemax = ae_config_get_int(&success, "changemax");
 	assert(success == 0 || changemax == 1 || changemax == 2);
 	if (!success) {
