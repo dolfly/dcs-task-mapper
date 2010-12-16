@@ -39,6 +39,66 @@
 #include "arch.h"
 #include "bruteforce.h"
 #include "neighborhood-test-mapping.h"
+#include "support.h"
+
+
+enum optmethod {
+	OPT_INVALID,
+	OPT_OPTIMAL_SUBSET_MAPPING,
+	OPT_RANDOM_MAPPING,
+	OPT_GROUP_MIGRATION,
+	OPT_SIMULATED_ANNEALING,
+	OPT_SIMULATED_ANNEALING_AUTOTEMP,
+	OPT_FAST_HYBRID_GM_SA,
+	OPT_FAST_HYBRID_GM_SA_AUTOTEMP,
+	OPT_SLOW_HYBRID_GM_SA,
+	OPT_SLOW_HYBRID_GM_SA_AUTOTEMP,
+	OPT_ITERATED_SIMULATED_ANNEALING,
+	OPT_ITERATED_SIMULATED_ANNEALING_AUTOTEMP,
+	OPT_GROUP_MIGRATION_2,
+	OPT_GROUP_MIGRATION_RANDOM,
+	OPT_GENETIC_ALGORITHM,
+	OPT_SIMULATED_ANNEALING_AUTOTEMP_2,
+	OPT_SIMULATED_ANNEALING_AUTOTEMP_3,
+	OPT_BRUTE_FORCE,
+	OPT_OSM_SA,
+	OPT_SIMULATED_ANNEALING_LEVELS,
+	OPT_NEIGHBORHOOD_TEST,
+	OPT_BRUTE_FORCE_WITH_SCHEDULE,
+	OPT_BRUTE_FORCE_MAP_SCHEDULE,
+};
+
+
+struct optmethods {
+	const char *name;
+	enum optmethod e;
+};
+
+static const struct optmethods optmethods[] = {
+	{"optimal_subset_mapping", OPT_OPTIMAL_SUBSET_MAPPING},
+	{"random_mapping", OPT_RANDOM_MAPPING},
+	{"group_migration", OPT_GROUP_MIGRATION},
+	{"simulated_annealing", OPT_SIMULATED_ANNEALING},
+	{"simulated_annealing_autotemp", OPT_SIMULATED_ANNEALING_AUTOTEMP},
+	{"fast_hybrid_gm_sa", OPT_FAST_HYBRID_GM_SA},
+	{"fast_hybrid_gm_sa_autotemp", OPT_FAST_HYBRID_GM_SA_AUTOTEMP},
+	{"slow_hybrid_gm_sa", OPT_SLOW_HYBRID_GM_SA},
+	{"slow_hybrid_gm_sa_autotemp", OPT_SLOW_HYBRID_GM_SA_AUTOTEMP},
+	{"iterated_simulated_annealing", OPT_ITERATED_SIMULATED_ANNEALING},
+	{"iterated_simulated_annealing_autotemp", OPT_ITERATED_SIMULATED_ANNEALING_AUTOTEMP},
+	{"group_migration_2", OPT_GROUP_MIGRATION_2},
+	{"group_migration_random", OPT_GROUP_MIGRATION_RANDOM},
+	{"genetic_algorithm", OPT_GENETIC_ALGORITHM},
+	{"simulated_annealing_autotemp2", OPT_SIMULATED_ANNEALING_AUTOTEMP_2},
+	{"simulated_annealing_autotemp3", OPT_SIMULATED_ANNEALING_AUTOTEMP_3},
+	{"brute_force", OPT_BRUTE_FORCE},
+	{"osm_sa", OPT_OSM_SA},
+	{"simulated_annealing_levels", OPT_SIMULATED_ANNEALING_LEVELS},
+	{"neighborhood_test", OPT_NEIGHBORHOOD_TEST},
+	{"brute_force_with_schedule", OPT_BRUTE_FORCE_WITH_SCHEDULE},
+	{"brute_force_map_schedule", OPT_BRUTE_FORCE_MAP_SCHEDULE},
+	{NULL, 0},
+};
 
 
 struct osm_sa_parameters {
@@ -174,10 +234,7 @@ static double time_power_objective(struct ae_mapping *map)
 struct ae_optimization *ae_create_optimization_context(void)
 {
 	struct ae_optimization *opt;
-
-	if ((opt = calloc(1, sizeof(opt[0]))) == NULL)
-		ae_err("not enough memory for optimization context\n");
-
+	CALLOC_ARRAY(opt, 1);
 	return opt;
 }
 
@@ -534,45 +591,23 @@ void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f)
 	char *objectives[] = {"execution_time",       /* 0 */
 			      "execution_time_power", /* 1 */
 			      NULL};
-
-	char *methods[] = {"optimal_subset_mapping",       /* 0 */
-			   "random_mapping",               /* 1 */
-			   "group_migration",              /* 2 */
-			   "simulated_annealing",          /* 3 */
-			   "simulated_annealing_autotemp", /* 4 */
-			   "fast_hybrid_gm_sa",            /* 5 */
-			   "fast_hybrid_gm_sa_autotemp",   /* 6 */
-			   "slow_hybrid_gm_sa",            /* 7 */
-			   "slow_hybrid_gm_sa_autotemp",   /* 8 */
-			   "iterated_simulated_annealing", /* 9 */
-			   "iterated_simulated_annealing_autotemp", /* 10 */
-			   "group_migration_2",            /* 11 */
-			   "group_migration_random",       /* 12 */
-			   "genetic_algorithm",            /* 13 */
-			   "simulated_annealing_autotemp2", /* 14 */
-			   "simulated_annealing_autotemp3", /* 15 */
-			   "brute_force",                  /* 16 */
-			   "osm_sa",                       /* 17 */
-			   "simulated_annealing_levels",   /* 18 */
-			   "neighborhood_test",            /* 19 */
-			   "brute_force_with_schedule",    /* 20 */
-			   "brute_force_map_schedule",     /* 21 */
-			   NULL};
 	int ret;
+	char *methodname;
+	int i;
+	enum optmethod optmethod;
 
 	ae_match_word("objective_function", f);
-
 	ret = ae_match_alternatives(objectives, f);
-
 	switch (ret) {
 	case 0:
 		/* time optimization */
 		opt->objective = default_objective;
 		break;
-
 	case 1:
-		/* time-power optimization with k parameter. k = 0 implies pure time
-		 * optimization case */
+		/*
+		 * time-power optimization with k parameter. k = 0 implies pure
+		 * time optimization case.
+		 */
 		ae_match_word("k", f);
 		opt->power_k = ae_get_double(f);
 		opt->objective = time_power_objective;
@@ -581,113 +616,110 @@ void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f)
 		ae_err("unknown objective\n");
 	}
 
-	if ((opt->objective_name = strdup(objectives[ret])) == NULL)
-		ae_err("no memory for objective function name\n");
-
+	opt->objective_name = xstrdup(objectives[ret]);
 	fprintf(stderr, "objective function: %s\n", objectives[ret]);
 
 	ae_match_word("method", f);
-
-	ret = ae_match_alternatives(methods, f);
-
-	if (methods[ret]) {
-		fprintf(stderr, "optimization method: %s\n", methods[ret]);
-
-		if ((opt->method_name = strdup(methods[ret])) == NULL)
-			ae_err("no memory for method name\n");
+	methodname = ae_get_word(f);
+	optmethod = OPT_INVALID;
+	for (i = 0; optmethods[i].name != NULL; i++) {
+		if (strcmp(methodname, optmethods[i].name) == 0) {
+			optmethod = optmethods[i].e;
+			break;
+		}
 	}
-
-	switch (ret) {
-	case 0:
+	opt->method_name = methodname;
+	switch (optmethod) {
+	case OPT_OPTIMAL_SUBSET_MAPPING:
 		opt->method = osm;
 		opt->params = ae_osm_read_parameters(f);
 		break;
-	case 1:
+	case OPT_RANDOM_MAPPING:
 		opt->method = random_mapping;
 		opt->params = ae_random_read_parameters(f);
 		break;
-	case 2:
+	case OPT_GROUP_MIGRATION:
 		opt->method = gm;
 		break;
-	case 3:
+	case OPT_SIMULATED_ANNEALING:
 		opt->method = sa;
 		opt->params = ae_sa_read_parameters(f);
 		break;
-	case 4:
+	case OPT_SIMULATED_ANNEALING_AUTOTEMP:
 		opt->method = sa;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
 		break;
-	case 5:
+	case OPT_FAST_HYBRID_GM_SA:
 		opt->method = fast_hybrid_gm_sa;
 		opt->params = ae_sa_read_parameters(f);
 		break;
-	case 6:
+	case OPT_FAST_HYBRID_GM_SA_AUTOTEMP:
 		opt->method = fast_hybrid_gm_sa;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
 		break;
-	case 7:
+	case OPT_SLOW_HYBRID_GM_SA:
 		opt->method = slow_hybrid_gm_sa;
 		opt->params = ae_sa_read_parameters(f);
 		break;
-	case 8:
+	case OPT_SLOW_HYBRID_GM_SA_AUTOTEMP:
 		opt->method = slow_hybrid_gm_sa;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
 		break;
-	case 9:
+	case OPT_ITERATED_SIMULATED_ANNEALING:
 		opt->method = iterated_sa;
 		opt->params = ae_sa_read_parameters(f);
 		break;
-	case 10:
+	case OPT_ITERATED_SIMULATED_ANNEALING_AUTOTEMP:
 		opt->method = iterated_sa;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
 		break;
-	case 11:
+	case OPT_GROUP_MIGRATION_2:
 		opt->method = gm2;
 		break;
-	case 12:
+	case OPT_GROUP_MIGRATION_RANDOM:
 		opt->method = gm_random;
 		break;
-	case 13:
+	case OPT_GENETIC_ALGORITHM:
 		opt->method = genetic_algorithm;
 		opt->params = ae_ga_read_parameters(f);
 		break;
-	case 14:
+	case OPT_SIMULATED_ANNEALING_AUTOTEMP_2:
 		opt->method = sa;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 2;
 		break;
-	case 15:
+	case OPT_SIMULATED_ANNEALING_AUTOTEMP_3:
 		opt->method = sa;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 3;
 		break;
-	case 16:
+	case OPT_BRUTE_FORCE:
 		opt->method = brute_force;
 		break;
-	case 17:
+	case OPT_OSM_SA:
 		opt->method = osm_sa;
 		opt->params = read_osm_sa_parameters(f);
 		break;
-	case 18:
+	case OPT_SIMULATED_ANNEALING_LEVELS:
 		opt->method = sa_with_levels;
 		opt->params = ae_sa_read_parameters(f);
 		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
 		break;
-	case 19:
+	case OPT_NEIGHBORHOOD_TEST:
 		opt->method = ae_neighborhood_test_mapping;
 		opt->params = ae_ntm_read_parameters(f);
 		break;
-	case 20:
+	case OPT_BRUTE_FORCE_WITH_SCHEDULE:
 		opt->method = brute_force_with_schedule;
 		break;
-	case 21:
+	case OPT_BRUTE_FORCE_MAP_SCHEDULE:
 		opt->method = brute_force_map_schedule;
 		break;
 	default:
-		ae_err("unknown method\n");
+		ae_err("Invalid optimization method: %s\n", methodname);
 	}
 }
