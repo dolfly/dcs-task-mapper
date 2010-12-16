@@ -18,15 +18,14 @@
  *  MA 02110-1301 USA
  */
 
-#include <string.h>
-#include <assert.h>
-
 #include "genetic_algorithm.h"
-
 #include "mapping.h"
 #include "arexbasic.h"
 #include "input.h"
 #include "result.h"
+
+#include <string.h>
+#include <assert.h>
 
 static struct individual *fork_individual(struct individual *individual,
 					  struct ga_parameters *p);
@@ -38,13 +37,20 @@ static void point_mutation(struct ae_mapping *map, unsigned int taskid);
 
 static double fitness(struct individual *individual, struct ga_parameters *p)
 {
-    return 1.0 / p->objective(individual->map);
+	double obj = p->objective(individual->map);
+	if (ae_config.find_maximum)
+		return obj;
+	else
+		return 1.0 / obj;
 }
 
 
 static inline double fitness_to_cost(double fitness)
 {
-    return 1.0 / fitness;
+	if (ae_config.find_maximum)
+		return fitness;
+	else
+		return 1.0 / fitness;
 }
 
 
@@ -364,8 +370,6 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
     struct individual **population, **newpopulation;
     struct ae_mapping *S_best;
     double gini;
-
-    assert(!ae_config.find_maximum);
 
     /* Initialize data structures */
     population = create_population(S0, p);
