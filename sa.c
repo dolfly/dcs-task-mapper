@@ -139,10 +139,8 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 			rejects = 0;
 
 		} else if (T <= params->Tf) {
-			if (rejects >= params->max_rejects) {
-				fprintf(stderr, "too many consecutive rejections (%d). stopping annealing.\n", rejects);
+			if (rejects >= params->max_rejects)
 				break;
-			}
 			rejects++;
 		}
 
@@ -172,8 +170,6 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 			levelrecorded = 0;
 		}
 	}
-
-	fprintf(stderr, "simulated annealing ends. T: %f k: %d\n", T, k);
 
 	ae_free_mapping(S);
 	ae_free_mapping(S_new);
@@ -319,19 +315,15 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
 		if (!strcmp("max_rejects", s)) {
 			nobmask |= 1;
 			p->max_rejects = ae_get_int(f);
-			fprintf(stderr, "sa max_rejects: %d\n", p->max_rejects);
 		} else if (!strcmp("schedule_max", s)) {
 			nobmask |= 2;
 			p->schedule_max = ae_get_int(f);
-			fprintf(stderr, "sa schedule_max: %d\n", p->schedule_max);
 		} else if (!strcmp("T0", s)) {
 			nobmask |= 4;
 			p->T0 = ae_get_double(f);
-			fprintf(stderr, "sa T0: %lf\n", p->T0);
 		} else if (!strcmp("Tf", s)) {
 			nobmask |= 8;
 			p->Tf = ae_get_double(f);
-			fprintf(stderr, "sa Tf: %lf\n", p->Tf);
 		} else if (!strcmp("acceptor", s)) {
 			nobmask |= 16;
 			ret = ae_match_alternatives(acceptors, f);
@@ -351,19 +343,16 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
 				ae_err("unknown sa schedule\n");
 			p->schedule = geometric_schedule;
 			p->schedule_param1 = ae_get_double(f);
-			fprintf(stderr, "sa schedule: %s %lf\n", schedules[ret], p->schedule_param1);
 		} else if (!strcmp("heuristics", s)) {
 			nobmask |= 64;
 			ret = ae_match_alternatives(heuristics_names, f);
 			if (ret < 0)
 				ae_err("unknown sa heuristics\n");
-			fprintf(stderr, "sa heuristics: %s\n", heuristics_names[ret]);
 			ae_sa_set_heuristics(p, heuristics_names[ret]);
 		} else if (!strcmp("zero_transition_prob", s)) {
 			double ztp = ae_get_double(f);
 			assert(ztp >= 0.0 && ztp <= 1.0);
 			p->zero_transition_prob = ztp;
-			fprintf(stderr, "sa zero_transition_prob: %lf\n", ztp);
 		} else {
 			ae_err("Unknown sa parameter: %s\n", s);
 		}

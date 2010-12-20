@@ -627,7 +627,6 @@ void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f)
 	}
 
 	opt->objective_name = xstrdup(objectives[ret]);
-	fprintf(stderr, "objective function: %s\n", objectives[ret]);
 
 	ae_match_word("method", f);
 	methodname = ae_get_word(f);
