@@ -52,18 +52,20 @@
     an efficient simulation algorithm,
     J. Optimization Theory and Appl. 45, 41-51.
 
+ Parameters:
+
  S0          is the initial state of the system
- T0          is the initial temperature of the system
+ T           the initial (and current) temperature of the system
  objective   the function to be optimized (finding minimum)
  move        maps current state and 'temperature' into a next state
  acceptor    is the probability of accepting a state change of 'difference'
              and 'temperature'
  max_rejects is the maximum number of consecutive moves that are rejected.
  schedule    returns temperature a new temperature
- schedule_rate is the rate of temperature being decreased (schedule() called).
+ schedule_max is the number of mapping iterations per temperature level.
  ref_E       reference objective value. Not necessary.
 
- All these parameters, except S0 and T0 are contained in an instance
+ All these parameters, except S0 and T are contained in an instance
  of struct ae_sa_parameters.
 */
 struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
@@ -92,8 +94,6 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 	S_new = ae_fork_mapping(S0);
 
 	while (1) {
-		fprintf(stderr, "accepted_objective: %.9lf\n", E);
-
 		if (params->leveloptimization) {
 			assert(salevels != NULL);
 			if (!levelrecorded) {
