@@ -165,10 +165,14 @@ void ae_print_result(struct ae_mapping *map, struct ae_mapping *oldmap)
   }
   printf("\ntotal_ic_utilisation: %.3f\n", utilisation / map->arch->nics);
 
-  printf("mapping_list %d ", map->ntasks);
+  printf("initial_mapping: ");
+  for (taskid = 0; taskid < map->ntasks; taskid++)
+    printf("%d ", oldmap->mappings[taskid]);
+  printf("\n");
+  printf("best_mapping: ");
   nchanged = 0;
   for (taskid = 0; taskid < map->ntasks; taskid++) {
-    printf("map %d %d ", taskid, map->mappings[taskid]);
+    printf("%d ", map->mappings[taskid]);
     if (map->mappings[taskid] != oldmap->mappings[taskid])
       nchanged++;
   }
