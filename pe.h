@@ -8,17 +8,17 @@
 
 
 struct ae_pe_state {
-  int busy;
-  double lastendtime;
-  int taskid;
-  int *taskrefcount;
-  struct ae_heap readyheap;
+	int busy;
+	double lastendtime;
+	int taskid;
+	int *taskrefcount;
+	struct ae_heap readyheap;
 };
 
 
 struct ae_taskpri {
-  double pri;
-  int taskid;
+	double pri;
+	int taskid;
 };
 
 
