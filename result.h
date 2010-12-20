@@ -8,18 +8,18 @@
 #include "arextypes.h"
 
 struct ae_result {
-  double initial;
-  double initial_time;
-  int initial_memory;
-  double best;
-  double best_time;
-  int best_memory;
-  struct timeval start_time;
-  struct timeval end_time;
-  long long evals;
-  ssize_t allocated;
-  double *time;
-  double *objective;
+	double initial;
+	double initial_time;
+	int initial_memory;
+	double best;
+	double best_time;
+	int best_memory;
+	struct timeval start_time;
+	struct timeval end_time;
+	long long evals;
+	ssize_t allocated;
+	double *time;
+	double *objective;
 };
 
 void ae_init_result(struct ae_mapping *map);
