@@ -4,10 +4,10 @@
 #include "arextypes.h"
 
 struct ae_random_parameters {
-  int max_iterations;
-  double constant;
-  double task_exp;
-  double pe_exp;
+	int max_iterations;
+	double constant;
+	double task_exp;
+	double pe_exp;
 };
 
 struct ae_mapping *ae_random_mapping(struct ae_mapping *map, double initial);
