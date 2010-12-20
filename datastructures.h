@@ -5,19 +5,19 @@
 #include <stdint.h>
 
 struct intlistarray {
-  int n;
-  int *nentries;
-  int *nentriesallocated;
-  int **entries;
+	int n;
+	int *nentries;
+	int *nentriesallocated;
+	int **entries;
 };
 
 struct ae_heap {
-  int (*compare)(void *a, void *b);
-  int unit;
-  int n;
-  int nallocated;
-  int8_t *temp;
-  int8_t *heap;
+	int (*compare)(void *a, void *b);
+	int unit;
+	int n;
+	int nallocated;
+	int8_t *temp;
+	int8_t *heap;
 };
 
 
