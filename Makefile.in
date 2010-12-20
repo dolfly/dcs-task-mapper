@@ -34,7 +34,7 @@ input.o:	input.c input.h $(BASICDEPS)
 intarray.o:	intarray.c intarray.h
 interconnect.o:	interconnect.c interconnect.h $(BASICDEPS)
 kpn.o:	kpn.c kpn.h intarray.h $(BASICDEPS)
-main.o:	main.c $(BASICDEPS)
+main.o:	main.c $(BASICDEPS) version.h
 mapping.o:	mapping.c mapping.h $(BASICDEPS)
 mappingheuristics.o:	mappingheuristics.c mappingheuristics.h $(BASICDEPS)
 neighborhood-test-mapping.o:	neighborhood-test-mapping.c neighborhood-test-mapping.h $(BASICDEPS)
