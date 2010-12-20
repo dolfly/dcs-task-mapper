@@ -33,75 +33,74 @@
 
 static void mh_new_chain(struct ae_mapping *m, struct ae_mapping *m_old, double T, int single)
 {
-  double u;
-  int max_deepness;
-  int peid;
-  int *assigned;
-  int nassigned;
-  struct ae_lifo_entry {
-    int taskid;
-    int deepness;
-  };
-  struct ae_lifo_entry *lifo;
-  int lifon;
-  int taskid, deepness;
-  int parentid, temp;
-  struct ae_task *task;
+	double u;
+	int max_deepness;
+	int peid;
+	int *assigned;
+	int nassigned;
+	struct ae_lifo_entry {
+		int taskid;
+		int deepness;
+	};
+	struct ae_lifo_entry *lifo;
+	int lifon;
+	int taskid, deepness;
+	int parentid, temp;
+	struct ae_task *task;
 
-  ae_copy_mapping(m, m_old);
-  if (m->arch->npes == 1)
-    return;
+	ae_copy_mapping(m, m_old);
+	if (m->arch->npes == 1)
+		return;
 
-  u = ae_randd(0, 1);
-  if (u == 0.0)
-    u = 0.5;
-  max_deepness = -floor(log(u)/log(2));
+	u = ae_randd(0, 1);
+	if (u == 0.0)
+		u = 0.5;
+	max_deepness = -floor(log(u)/log(2));
 
-  peid = ae_randi(0, m->arch->npes);
+	peid = ae_randi(0, m->arch->npes);
 
-  CALLOC_ARRAY(assigned, m->ntasks);
-  nassigned = 0;
+	CALLOC_ARRAY(assigned, m->ntasks);
+	nassigned = 0;
 
-  MALLOC_ARRAY(lifo, m->ntasks);
-  lifon = 1;
+	MALLOC_ARRAY(lifo, m->ntasks);
+	lifon = 1;
 
-  lifo[0].taskid = ae_randi(0, m->ntasks);
-  lifo[0].deepness = 1;
+	lifo[0].taskid = ae_randi(0, m->ntasks);
+	lifo[0].deepness = 1;
 
-  while (lifon > 0) {
-    lifon--;
-    taskid = lifo[lifon].taskid;
-    assert(taskid >= 0 && taskid < m->ntasks);
-    deepness = lifo[lifon].deepness;
-    nassigned++;
-    ae_set_mapping(m, taskid, peid);
-    if (deepness >= max_deepness)
-      continue;
+	while (lifon > 0) {
+		lifon--;
+		taskid = lifo[lifon].taskid;
+		assert(taskid >= 0 && taskid < m->ntasks);
+		deepness = lifo[lifon].deepness;
+		nassigned++;
+		ae_set_mapping(m, taskid, peid);
+		if (deepness >= max_deepness)
+			continue;
 
-    task = m->tasks[taskid];
+		task = m->tasks[taskid];
 
-    if (single) {
-      if (task->nin > 0) {
-	parentid = task->in[ae_randi(0, task->nin)];
-	if (assigned[parentid])
-	  continue;
-	assigned[parentid] = 1;
-	lifo[lifon].taskid = parentid;
-	lifo[lifon].deepness = deepness + 1;
-	lifon++;	
-      }
-    } else {
-      AE_FOR_EACH_PARENT(task, parentid, temp) {
-	if (assigned[parentid])
-	  continue;
-	assigned[parentid] = 1;
-	lifo[lifon].taskid = parentid;
-	lifo[lifon].deepness = deepness + 1;
-	lifon++;
-      }
-    }
-  }
-  /* fprintf(stderr, "nassigned: %d\n", nassigned); */
+		if (single) {
+			if (task->nin > 0) {
+				parentid = task->in[ae_randi(0, task->nin)];
+				if (assigned[parentid])
+					continue;
+				assigned[parentid] = 1;
+				lifo[lifon].taskid = parentid;
+				lifo[lifon].deepness = deepness + 1;
+				lifon++;	
+			}
+		} else {
+			AE_FOR_EACH_PARENT(task, parentid, temp) {
+				if (assigned[parentid])
+					continue;
+				assigned[parentid] = 1;
+				lifo[lifon].taskid = parentid;
+				lifo[lifon].deepness = deepness + 1;
+				lifon++;
+			}
+		}
+	}
 }
 
 
