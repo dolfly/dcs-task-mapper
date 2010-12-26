@@ -2,6 +2,7 @@ CC={CC}
 CFLAGS=-Wall -O2 -g
 LDFLAGS=-lm
 MODULES= arch.o arexbasic.o bruteforce.o datastructures.o fast_premapping.o genetic_algorithm.o gm.o input.o intarray.o interconnect.o kpn.o main.o mapping.o mappingheuristics.o neighborhood-test-mapping.o optimalsubset.o optimization.o permutation.o pe.o result.o sa.o schedule.o support.o task.o randommapping.o vplist.o
+BINDIR = {BINDIR}
 
 all:	taskmapper
 
@@ -15,3 +16,7 @@ taskmapper:	$(MODULES)
 
 clean:	
 	rm -f *.o taskmapper
+
+install:	all
+	mkdir -m 755 -p "$(DESTDIR)$(BINDIR)"
+	install taskmapper "$(DESTDIR)$(BINDIR)"/

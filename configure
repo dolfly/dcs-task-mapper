@@ -21,6 +21,9 @@ for opt in "$@" ; do
 	--compiler=*)
 		compiler="`echo $opt | sed -n 's|--compiler=\(.*\)|\1|p'`"
 		;;
+	--home)
+		prefix="$HOME"
+		;;
 	--python=*)
 		python="`echo $opt | sed -n 's|--python=\(.*\)|\1|p'`"
 		;;
@@ -33,7 +36,8 @@ for opt in "$@" ; do
 		echo " --prefix=dir           Select install prefix. Default is HOME/koski"
  		echo " --package-prefix=dest  Pretend to install to the prefix, but copy files to"
                 echo "                        'dest/prefix' on make install"
-		echo " --compiler=program     compile with 'program' (gcc)"
+		echo " --compiler=program     Compile with 'program' (gcc)"
+		echo " --home                 Install to \$HOME directory, same as --prefix=\$HOME"
 		echo " --libdir=dir           Select library directory. The default is PREFIX/lib."
 		echo " --python=prog          Select python interpreter."
 		exit
