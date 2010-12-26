@@ -7,10 +7,6 @@ all:	taskmapper
 
 .SUFFIXES: .c .o
 
-test:	
-	@echo "error: use test.sh"
-	@false
-
 taskmapper:	$(MODULES)
 	$(CC) -o $@ $(MODULES) $(LDFLAGS)
 
