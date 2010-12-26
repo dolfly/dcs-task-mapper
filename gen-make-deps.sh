@@ -8,7 +8,7 @@ die() {
 getdeps() {
     for depname in $(cpp -MM "$1" |cut -d: -f2-) ; do
 	echo $depname
-    done |sort |uniq |grep '\.[ch]$'
+    done |grep '\.[ch]$'
 }
 
 makefile="$1";
