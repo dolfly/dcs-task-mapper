@@ -5,6 +5,12 @@ die() {
     exit 1
 }
 
+getdeps() {
+    for depname in $(cpp -MM "$1" |cut -d: -f2-) ; do
+	echo $depname
+    done |sort |uniq |grep '\.[ch]$'
+}
+
 makefile="$1";
 if test -z "$makefile" ; then
     makefile="Makefile"
@@ -25,14 +31,7 @@ cat "$makefile" > "$tmp"
 echo >> "$tmp"
 
 for prefix in $prefixes ; do
-    cname="$prefix.c"
-    deps="$cname"
-    hname="$prefix.h"
-    if test -e "$hname" ; then
-	deps="$deps $hname"
-    fi
-    deps=$(echo $deps $(grep '^#include\W*".*\.h"' < "$cname" |cut -d '"' -f2 |grep -v "^$hname"))
-    echo "$prefix.o: $deps" >> "$tmp"
+    echo "$prefix.o: $(echo $(getdeps "$prefix.c"))" >> "$tmp"
 done
 
 mv -f "$tmp" "$makefile"
