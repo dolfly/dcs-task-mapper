@@ -150,30 +150,30 @@ long long ae_get_long_long(FILE *f)
 
 unsigned int ae_get_uint(FILE *f)
 {
-  int ret;
-  unsigned int res;
-  ret = fscanf(f, "%u", &res);
-  if (ret != 1)
-    ae_err("no input when trying to get unsigned int\n");
-  return res;
+	int ret;
+	unsigned int res;
+	ret = fscanf(f, "%u", &res);
+	if (ret != 1)
+		ae_err("no input when trying to get unsigned int\n");
+	return res;
 }
 
 char *ae_get_word(FILE *f)
 {
-  int ret;
-  char buf[256];
-  char *s;
+	int ret;
+	char buf[256];
+	char *s;
 
-  ret = fscanf(f, "%255s", buf);
+	ret = fscanf(f, "%255s", buf);
 
-  if (ret != 1)
-    ae_err("no input when trying to get int\n");
+	if (ret != 1)
+		ae_err("no input when trying to get int\n");
 
-  s = strdup(buf);
-  if (s == NULL)
-    ae_err("Not enough memory when reading %s\n", buf);
+	s = strdup(buf);
+	if (s == NULL)
+		ae_err("Not enough memory when reading %s\n", buf);
 
-  return s;
+	return s;
 }
 
 
@@ -182,238 +182,234 @@ char *ae_get_word(FILE *f)
    is no match otherwise, -1 is returned */
 int ae_match_alternatives(char **alts, FILE *f)
 {
-  int res, ret;
-  char buf[256];
-  ret = fscanf(f, "%255s", buf);
-  if (ret != 1) {
-    if (feof(f))
-      return -2;
-    return -1;
-  }
-  buf[255] = 0;
-  res = 0;
-  while (*alts) {
-    if (strcmp(*alts, buf) == 0)
-      break;
-    res++;
-    alts++;
-  }
-  if (*alts == NULL)
-    ae_err("no match on alternatives (got %s)\n", buf);
-  return res;
+	int res, ret;
+	char buf[256];
+	ret = fscanf(f, "%255s", buf);
+	if (ret != 1) {
+		if (feof(f))
+			return -2;
+		return -1;
+	}
+	buf[255] = 0;
+	res = 0;
+	while (*alts) {
+		if (strcmp(*alts, buf) == 0)
+			break;
+		res++;
+		alts++;
+	}
+	if (*alts == NULL)
+		ae_err("no match on alternatives (got %s)\n", buf);
+	return res;
 }
 
 
 void ae_match_word(const char *str, FILE *f)
 {
-  int ret;
-  char buf[256];
-  ret = fscanf(f, "%255s", buf);
-  if (ret != 1)
-    ae_err("no input when trying to match %s\n", str);
-  buf[255] = 0;
-  if (strcmp(str, buf))
-    ae_err("%s not matched (got %s)\n", str, buf);
+	int ret;
+	char buf[256];
+	ret = fscanf(f, "%255s", buf);
+	if (ret != 1)
+		ae_err("no input when trying to match %s\n", str);
+	buf[255] = 0;
+	if (strcmp(str, buf))
+		ae_err("%s not matched (got %s)\n", str, buf);
 }
 
 
 static void match_architecture(struct ae_arch *arch, FILE *f)
 {
-  char *arch_categories[] = {"processing_element_list",
-			     "interconnect_list", NULL};
+	char *arch_categories[] = {"processing_element_list",
+				   "interconnect_list", NULL};
 
-  int ics = -1;
-  int pes = -1;
-  int ret;
-  int i;
-  struct ae_pe *pe;
-  struct ae_interconnect *ic;
-  double totalarea = 0.0;
-  char *icpri = ae_config.ic_priorities;
+	int ics = -1;
+	int pes = -1;
+	int ret;
+	int i;
+	struct ae_pe *pe;
+	struct ae_interconnect *ic;
+	double totalarea = 0.0;
+	char *icpri = ae_config.ic_priorities;
 
-  while (ics == -1 || pes == -1) {
+	while (ics == -1 || pes == -1) {
 
-    ret = ae_match_alternatives(arch_categories, f);
+		ret = ae_match_alternatives(arch_categories, f);
 
-    switch (ret) {
-    case 0:
-      assert(pes == -1);
-      pes = ae_get_int(f);
-      assert(pes > 0);
+		switch (ret) {
+		case 0:
+			assert(pes == -1);
+			pes = ae_get_int(f);
+			assert(pes > 0);
 
-      for (i = 0; i < pes; i++) {
-	ae_match_word("processing_element", f);
-	ae_add_pe_string(arch, f);
+			for (i = 0; i < pes; i++) {
+				ae_match_word("processing_element", f);
+				ae_add_pe_string(arch, f);
 
-	pe = arch->pes[i];
+				pe = arch->pes[i];
 
-	if (icpri != NULL && i < strlen(icpri)) {
-		pe->ic_initial_priority = icpri[i] - '0';
-		assert(pe->ic_initial_priority >= 0);
+				if (icpri != NULL && i < strlen(icpri)) {
+					pe->ic_initial_priority = icpri[i] - '0';
+					assert(pe->ic_initial_priority >= 0);
+				}
+
+				totalarea += pe->area;
+
+				printf("pe: id %d freq %lld perf %e area %e\n",
+				       pe->id, pe->freq, pe->performance_factor, pe->area);
+			}
+			break;
+
+		case 1:
+			assert(ics == -1);
+			ics = ae_get_int(f);
+			assert(ics > 0);
+
+			for (i = 0; i < ics; i++) {
+				ae_match_word("interconnect", f);
+				ae_add_ic_string(arch, f);
+				ic = arch->ics[i];
+				printf("interconnect: id %d freq %lld area %e width %d latency %d policy %d\n",
+				       ic->id, ic->freq, ic->area, ic->width, ic->latency, ic->policy);
+			}
+
+			for (i = 0; i < ics; i++) {
+				if (arch->ics[i]->freq != arch->ics[0]->freq ||
+				    arch->ics[i]->width != arch->ics[0]->width ||
+				    arch->ics[i]->latency != arch->ics[0]->latency) {
+					ae_err("IC %d is not same as IC 0\n", i);
+				}
+			}
+			break;
+
+		default:
+			ae_err("match_architecture: %d\n", ret);
+		}
 	}
 
-	totalarea += pe->area;
-
-	printf("pe: id %d freq %lld perf %e area %e\n",
-	       pe->id, pe->freq, pe->performance_factor, pe->area);
-      }
-
-      break;
-
-    case 1:
-      assert(ics == -1);
-      ics = ae_get_int(f);
-      assert(ics > 0);
-
-      for (i = 0; i < ics; i++) {
-	ae_match_word("interconnect", f);
-	ae_add_ic_string(arch, f);
-
-	ic = arch->ics[i];
-
-	printf("interconnect: id %d freq %lld area %e width %d latency %d policy %d\n",
-	       ic->id, ic->freq, ic->area, ic->width, ic->latency, ic->policy);
-      }
-
-      for (i = 0; i < ics; i++) {
-	if (arch->ics[i]->freq != arch->ics[0]->freq ||
-	    arch->ics[i]->width != arch->ics[0]->width ||
-	    arch->ics[i]->latency != arch->ics[0]->latency) {
-	  ae_err("IC %d is not same as IC 0\n", i);
-	}
-      }
-
-      break;
-
-    default:
-      ae_err("match_architecture: %d\n", ret);
-    }
-  }
-
-  fflush(stdout);
+	fflush(stdout);
 }
 
 
 static void parse_mappings(struct ae_mapping *map, FILE *f)
 {
-  int nmappings;
-  int peid, taskid;
-  int i;
-  nmappings = ae_get_int(f);
-  assert(nmappings >= 0 && nmappings <= map->ntasks);
-  for (i = 0; i < nmappings; i++) {
-    ae_match_word("map", f);
-    taskid = ae_get_int(f);
-    assert(taskid >= 0 && taskid < map->ntasks);
-    peid = ae_get_int(f);
-    assert(peid >= 0);
-    map->mappings[taskid] = peid;
-  }
+	int nmappings;
+	int peid, taskid;
+	int i;
+	nmappings = ae_get_int(f);
+	assert(nmappings >= 0 && nmappings <= map->ntasks);
+	for (i = 0; i < nmappings; i++) {
+		ae_match_word("map", f);
+		taskid = ae_get_int(f);
+		assert(taskid >= 0 && taskid < map->ntasks);
+		peid = ae_get_int(f);
+		assert(peid >= 0);
+		map->mappings[taskid] = peid;
+	}
 }
 
 
 static void match_tasks(struct ae_mapping *map, FILE *f)
 {
-  int i;
-  int default_mapping;
-  int nstatics;
-  int taskid;
-  char *apptype;
+	int i;
+	int default_mapping;
+	int nstatics;
+	int taskid;
+	char *apptype;
 
-  apptype = ae_get_word(f);
-  if (strcmp(apptype, "task_list") == 0) {
-    ae_read_stg(map, f);
-  } else if (strcmp(apptype, "kpn") == 0) {
-    ae_read_kpn(map, f);
-  } else {
-    ae_err("Unknown application type: %s\n", apptype);
-  }
-  printf("appmodel: %s\n", map->appmodel->name);
-  free(apptype);
-  apptype = NULL;
+	apptype = ae_get_word(f);
+	if (strcmp(apptype, "task_list") == 0) {
+		ae_read_stg(map, f);
+	} else if (strcmp(apptype, "kpn") == 0) {
+		ae_read_kpn(map, f);
+	} else {
+		ae_err("Unknown application type: %s\n", apptype);
+	}
+	printf("appmodel: %s\n", map->appmodel->name);
+	free(apptype);
+	apptype = NULL;
 
-  ae_match_word("default_mapping", f);
-  default_mapping = ae_get_int(f);
-  assert(default_mapping >= 0);
-  if ((map->mappings = malloc(map->ntasks * sizeof(int))) == NULL)
-    ae_err("match_tasks: no memory\n");
-  if ((map->isstatic = malloc(map->ntasks * sizeof(int))) == NULL)
-    ae_err("match_tasks: no memory\n");
-  for (i = 0; i < map->ntasks; i++) {
-    map->mappings[i] = default_mapping;
-    map->isstatic[i] = 0;
-  }
+	ae_match_word("default_mapping", f);
+	default_mapping = ae_get_int(f);
+	assert(default_mapping >= 0);
+	if ((map->mappings = malloc(map->ntasks * sizeof(int))) == NULL)
+		ae_err("match_tasks: no memory\n");
+	if ((map->isstatic = malloc(map->ntasks * sizeof(int))) == NULL)
+		ae_err("match_tasks: no memory\n");
+	for (i = 0; i < map->ntasks; i++) {
+		map->mappings[i] = default_mapping;
+		map->isstatic[i] = 0;
+	}
 
-  ae_match_word("mapping_list", f);
-  parse_mappings(map, f);
+	ae_match_word("mapping_list", f);
+	parse_mappings(map, f);
 
-  ae_match_word("static_list", f);
-  nstatics = ae_get_int(f);
-  assert(nstatics >= 0 && nstatics <= map->ntasks);
-  for (i = 0; i < nstatics; i++) {
-    taskid = ae_get_int(f);
-    assert(taskid >= 0 && taskid < map->ntasks);
-    map->isstatic[taskid] = 1;
-  }
+	ae_match_word("static_list", f);
+	nstatics = ae_get_int(f);
+	assert(nstatics >= 0 && nstatics <= map->ntasks);
+	for (i = 0; i < nstatics; i++) {
+		taskid = ae_get_int(f);
+		assert(taskid >= 0 && taskid < map->ntasks);
+		map->isstatic[taskid] = 1;
+	}
 }
 
 
 struct ae_mapping *ae_read_input(FILE *f)
 {
-  char *main_categories[] = {"architecture", "tasks", "optimization", NULL};
-  char *extras[] = {"mapping_list", NULL};
-  int ret;
-  struct ae_arch *arch;
-  struct ae_mapping *map;
-  int got_arch = 0;
-  int got_map = 0;
-  int got_opt = 0;
-  int i;
+	char *main_categories[] = {"architecture", "tasks", "optimization", NULL};
+	char *extras[] = {"mapping_list", NULL};
+	int ret;
+	struct ae_arch *arch;
+	struct ae_mapping *map;
+	int got_arch = 0;
+	int got_map = 0;
+	int got_opt = 0;
+	int i;
 
-  arch = ae_create_arch();
-  map = ae_create_mapping();
-  map->optimization = ae_create_optimization_context();
-  CALLOC_ARRAY(map->appmodel, 1);
+	arch = ae_create_arch();
+	map = ae_create_mapping();
+	map->optimization = ae_create_optimization_context();
+	CALLOC_ARRAY(map->appmodel, 1);
 
-  while (got_arch == 0 || got_map == 0 || got_opt == 0) {
-    ret = ae_match_alternatives(main_categories, f);
-    switch (ret) {
-    case 0:
-      assert(got_arch == 0);
-      match_architecture(arch, f);
+	while (got_arch == 0 || got_map == 0 || got_opt == 0) {
+		ret = ae_match_alternatives(main_categories, f);
+		switch (ret) {
+		case 0:
+			assert(got_arch == 0);
+			match_architecture(arch, f);
 
-      MALLOC_ARRAY(map->icpriorities, arch->npes);
-      for (i = 0; i < arch->npes; i++)
-	map->icpriorities[i] = arch->pes[i]->ic_initial_priority;
+			MALLOC_ARRAY(map->icpriorities, arch->npes);
+			for (i = 0; i < arch->npes; i++)
+				map->icpriorities[i] = arch->pes[i]->ic_initial_priority;
 
-      got_arch = 1;
-      break;
-    case 1:
-      assert(got_map == 0);
-      match_tasks(map, f);
-      got_map = 1;
-      break;
-    case 2:
-      assert(got_opt == 0);
-      ae_read_optimization_parameters(map->optimization, f);
-      got_opt = 1;
-      break;
-    default:
-      ae_err("very unexpected error in ae_read_input\n");
-    }
-  }
+			got_arch = 1;
+			break;
+		case 1:
+			assert(got_map == 0);
+			match_tasks(map, f);
+			got_map = 1;
+			break;
+		case 2:
+			assert(got_opt == 0);
+			ae_read_optimization_parameters(map->optimization, f);
+			got_opt = 1;
+			break;
+		default:
+			ae_err("very unexpected error in ae_read_input\n");
+		}
+	}
 
-  map->arch = arch;
+	map->arch = arch;
 
-  while ((ret = ae_match_alternatives(extras, f)) != -2) {
-    switch (ret) {
-    case 0:
-      parse_mappings(map, f);
-      break;
-    default:
-      ae_err("unexpected extras\n");
-    }
-  }
+	while ((ret = ae_match_alternatives(extras, f)) != -2) {
+		switch (ret) {
+		case 0:
+			parse_mappings(map, f);
+			break;
+		default:
+			ae_err("unexpected extras\n");
+		}
+	}
 
-  return map;
+	return map;
 }
