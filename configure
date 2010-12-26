@@ -93,6 +93,12 @@ for file in Makefile.in ; do
 	-e "s|{LIBDIR}|$libdir/staticarex|g" \
 	-e "s|{EXEPOSTFIX}|$exepostfix|g" \
 	< "$file" > "$dst"
+    ./gen-make-deps.sh "$dst"
+    if test "$?" != "0" ; then
+	echo
+	echo "WARNING: generating deps for $dst failed, but compilation may still work"
+	echo
+    fi
 done
 
 echo ""

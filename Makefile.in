@@ -1,13 +1,7 @@
 CC={CC}
 CFLAGS=-Wall -O2 -g
 LDFLAGS=-lm
-MODULES=arch.o arexbasic.o bruteforce.o datastructures.o fast_premapping.o \
-	genetic_algorithm.o gm.o input.o intarray.o interconnect.o kpn.o \
-	main.o mapping.o mappingheuristics.o neighborhood-test-mapping.o \
-	optimalsubset.o optimization.o permutation.o \
-	pe.o result.o sa.o schedule.o support.o task.o \
-	randommapping.o vplist.o
-BASICDEPS=arexbasic.h arextypes.h schedule.h vplist.h support.h
+MODULES= arch.o arexbasic.o bruteforce.o datastructures.o fast_premapping.o genetic_algorithm.o gm.o input.o intarray.o interconnect.o kpn.o main.o mapping.o mappingheuristics.o neighborhood-test-mapping.o optimalsubset.o optimization.o permutation.o pe.o result.o sa.o schedule.o support.o task.o randommapping.o vplist.o
 
 all:	taskmapper
 
@@ -22,33 +16,6 @@ taskmapper:	$(MODULES)
 
 .c.o:	
 	$(CC) $(CFLAGS) -c $<
-
-arch.o:	arch.c arch.h $(BASICDEPS)
-arexbasic.o:	arexbasic.c $(BASICDEPS)
-bruteforce.o:	bruteforce.c $(BASICDEPS)
-datastructures.o:	datastructures.c datastructures.h $(BASICDEPS)
-fast_premapping.o:	fast_premapping.c fast_premapping.h $(BASICDEPS)
-genetic_algorithm.o:	genetic_algorithm.c genetic_algorithm.h $(BASICDEPS)
-gm.o:	gm.c gm.h $(BASICDEPS)
-input.o:	input.c input.h $(BASICDEPS)
-intarray.o:	intarray.c intarray.h
-interconnect.o:	interconnect.c interconnect.h $(BASICDEPS)
-kpn.o:	kpn.c kpn.h intarray.h $(BASICDEPS)
-main.o:	main.c $(BASICDEPS) version.h
-mapping.o:	mapping.c mapping.h $(BASICDEPS)
-mappingheuristics.o:	mappingheuristics.c mappingheuristics.h $(BASICDEPS)
-neighborhood-test-mapping.o:	neighborhood-test-mapping.c neighborhood-test-mapping.h $(BASICDEPS)
-optimalsubset.o:	optimalsubset.c optimalsubset.h $(BASICDEPS)
-optimization.o:	optimization.c optimization.h fast_premapping.h genetic_algorithm.h gm.h randommapping.h sa.h $(BASICDEPS)
-permutation.o:	permutation.c permutation.h
-pe.o:	pe.c pe.h $(BASICDEPS)
-randommapping.o:	randommapping.c randommapping.h $(BASICDEPS)
-result.o:	result.c result.h $(BASICDEPS)
-sa.o:	sa.c sa.h $(BASICDEPS)
-schedule.o:	schedule.c schedule.h $(BASICDEPS)
-support.o:	support.c support.h
-task.o:	task.c task.h $(BASICDEPS)
-vplist.o: vplist.c vplist.h
 
 clean:	
 	rm -f *.o taskmapper
