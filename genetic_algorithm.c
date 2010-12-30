@@ -479,7 +479,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 
 	while (1) {
 		s = ae_get_word(f);
-		if (strcmp(s, "end_opt_parameters") == 0)
+		if (strcmp(s, "end_method") == 0)
 			break;
 
 		for (i = 0; pars[i].name != NULL; i++) {

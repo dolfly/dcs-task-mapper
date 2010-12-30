@@ -139,9 +139,9 @@ struct ae_mapping *ae_sa(struct sa_level *salevels, size_t maxlevels,
 			rejects = 0;
 
 		} else if (T <= params->Tf) {
-			if (rejects >= params->max_rejects)
-				break;
 			rejects++;
+			if (T <= params->Tt || rejects > params->max_rejects)
+				break;
 		}
 
 		k++;
@@ -207,6 +207,9 @@ void ae_sa_autotemp(struct ae_sa_parameters *params, struct ae_mapping *map)
 		ae_stg_sa_autotemp(params, minperf, maxperf, params->autotemp_k, map);
 	else
 		ae_kpn_autotemp(params, minperf, maxperf, params->autotemp_k, map);
+
+	if (params->autotemp_mode != AE_SA_AUTOTEMP_OLD)
+		params->Tt = 0.5 * params->Tf;
 
 	assert(params->T0 > 0.0);
 	assert(params->Tf > 0.0);
@@ -332,7 +335,7 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f, struct ae_mapping *map)
 
 	while (1) {
 		s = ae_get_word(f);
-		if (!strcmp(s, "end_simulated_annealing") || !strcmp(s, "end_opt")) {
+		if (!strcmp(s, "end_simulated_annealing") || !strcmp(s, "end_method")) {
 			free(s);
 			s = NULL;
 			break;
@@ -347,8 +350,13 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f, struct ae_mapping *map)
 			p->schedule_max = ae_get_int(f);
 		} else if (!strcmp("T0", s)) {
 			p->T0 = ae_get_double(f);
+			assert(p->T0 > 0.0);
 		} else if (!strcmp("Tf", s)) {
 			p->Tf = ae_get_double(f);
+			assert(p->Tf > 0.0);
+		} else if (!strcmp("Tt", s)) {
+			p->Tf = ae_get_double(f);
+			assert(p->Tt >= 0.0);
 		} else if (!strcmp("acceptor", s)) {
 			t = ae_get_word(f);
 			for (i = 0; acceptors[i].name != NULL; i++) {

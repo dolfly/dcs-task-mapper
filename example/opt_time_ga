@@ -8,4 +8,4 @@ optimization
 		crossover_probability           1.0
 		chromosome_mutation_probability 1.0
                 gene_mutation_probability       0.01
-        end_opt_parameters
+        end_method
