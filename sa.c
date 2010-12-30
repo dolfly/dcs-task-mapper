@@ -186,7 +186,6 @@ void ae_sa_autotemp(struct ae_sa_parameters *params, struct ae_mapping *map)
 	double maxperf;
 	double minperf;
 	struct ae_pe *pe;
-	double k = 2.0;
 
 	minperf = 1E10;
 	maxperf = 0.0;
@@ -205,13 +204,15 @@ void ae_sa_autotemp(struct ae_sa_parameters *params, struct ae_mapping *map)
 	}
 
 	if (map->tasks)
-		ae_stg_sa_autotemp(params, minperf, maxperf, k, map);
+		ae_stg_sa_autotemp(params, minperf, maxperf, params->autotemp_k, map);
 	else
-		ae_kpn_autotemp(params, minperf, maxperf, k, map);
+		ae_kpn_autotemp(params, minperf, maxperf, params->autotemp_k, map);
 
 	assert(params->T0 > 0.0);
 	assert(params->Tf > 0.0);
 	assert(params->T0 >= params->Tf);
+	assert(params->Tt >= 0.0);
+	assert(params->Tf >= params->Tt);
 }
 
 #define DIVISOR_LOWER_LIMIT 1E-14
@@ -222,6 +223,7 @@ static double inverse_exponential_acceptor(double dE, double T,
 					   struct ae_sa_parameters *params)
 {
 	double divisor, exponent;
+	double ztp = params->ztpset ? params->zero_transition_prob : 0.5;
 	divisor = params->acceptor_param1 * T;
 	if (divisor < DIVISOR_LOWER_LIMIT) {
 		fprintf(stderr, "sa acceptor divisor too small\n");
@@ -230,7 +232,7 @@ static double inverse_exponential_acceptor(double dE, double T,
 	exponent = dE / divisor;
 	if (exponent > EXPONENT_UPPER_LIMIT)
 		return 0.0;
-	return 2.0 * params->zero_transition_prob / (1 + exp(exponent));
+	return 2.0 * ztp / (1 + exp(exponent));
 }
 
 static double exponential_acceptor(double dE, double T,
@@ -238,6 +240,7 @@ static double exponential_acceptor(double dE, double T,
 {
 	double exponent;
 	double divisor;
+	double ztp = params->ztpset ? params->zero_transition_prob : 1.0;
 	divisor = params->acceptor_param1 * T;
 	if (divisor < DIVISOR_LOWER_LIMIT) {
 		fprintf(stderr, "sa acceptor divisor too small\n");
@@ -246,7 +249,7 @@ static double exponential_acceptor(double dE, double T,
 	exponent = -dE / divisor;
 	if (exponent >= 0)
 		return 1.0;
-	return exp(exponent);
+	return ztp * exp(exponent);
 }
 
 static double special_1_acceptor(double dE, double T, struct ae_sa_parameters *params)
@@ -267,12 +270,25 @@ static double geometric_schedule(double T, struct ae_sa_parameters *params)
 
 
 /* read simulated annealing parameters from file f. */
-struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
+struct ae_sa_parameters *ae_sa_read_parameters(FILE *f, struct ae_mapping *map)
 {
 	struct ae_sa_parameters *p;
 
-	/* Name "exponential" is misleading, it's "inverse exponential", really */
-	char *acceptors[] = {"exponential", "original", "special_1", NULL};
+	/*
+	 * Name "exponential" is misleading, it's "inverse exponential",
+	 * really. "exponential", "original" and "special_1" are deprecated.
+	 * Use "exp" or "invexp" instead.
+	 */
+	struct {
+		const char *name;
+		void *f;
+	} acceptors[] = {{"exponential", inverse_exponential_acceptor},
+			 {"invexp", inverse_exponential_acceptor},
+			 {"exp", exponential_acceptor},
+			 {"original", exponential_acceptor},
+			 {"special_1", special_1_acceptor},
+			 {NULL, NULL},
+			};
 
 	char *schedules[] = {"geometric", NULL};
 	char **heuristics_names;
@@ -280,13 +296,23 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
 	int ret;
 	int i, nheuristics;
 	char *s;
-	/* obligatory mask */
-	int nobmask = 0;
+	char *t;
+	int L;
 
-	if ((p = calloc(1, sizeof(p[0]))) == NULL)
-		ae_err("no memory for sa context\n");
+	CALLOC_ARRAY(p, 1);
+	p->zero_transition_prob = 1.0;
+	p->acceptor = exponential_acceptor;
+	ae_sa_set_heuristics(p, "rm");
+	p->schedule = geometric_schedule;
+	p->schedule_param1 = 0.95;
+	p->autotemp_k = 2.0;
+	p->T0 = 1.0000;
+	p->Tf = 0.0001;
+	p->Tt = 0.0000;
 
-	p->zero_transition_prob = 0.5;
+	L = map->ntasks * (map->arch->npes - 1);
+	p->max_rejects = L;
+	p->schedule_max = L;
 
 	nheuristics = 0;
 	h = mh_heuristics;
@@ -306,49 +332,50 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
 
 	while (1) {
 		s = ae_get_word(f);
-		if (!strcmp(s, "end_simulated_annealing")) {
+		if (!strcmp(s, "end_simulated_annealing") || !strcmp(s, "end_opt")) {
 			free(s);
 			s = NULL;
 			break;
 		}
-
-		if (!strcmp("max_rejects", s)) {
-			nobmask |= 1;
+		if (!strcmp("autotemp", s)) {
+			p->autotemp_mode = AE_SA_AUTOTEMP;
+			p->autotemp_k = ae_get_double(f);
+			assert(p->autotemp_k > 0.0);
+		} else if (!strcmp("max_rejects", s)) {
 			p->max_rejects = ae_get_int(f);
 		} else if (!strcmp("schedule_max", s)) {
-			nobmask |= 2;
 			p->schedule_max = ae_get_int(f);
 		} else if (!strcmp("T0", s)) {
-			nobmask |= 4;
 			p->T0 = ae_get_double(f);
 		} else if (!strcmp("Tf", s)) {
-			nobmask |= 8;
 			p->Tf = ae_get_double(f);
 		} else if (!strcmp("acceptor", s)) {
-			nobmask |= 16;
-			ret = ae_match_alternatives(acceptors, f);
-			if (ret == 0)
-				p->acceptor = inverse_exponential_acceptor;
-			else if (ret == 1)
-				p->acceptor = exponential_acceptor;
-			else if (ret == 2)
-				p->acceptor = special_1_acceptor;
-			else
-				ae_err("unknown sa acceptor\n");
-			printf("sa_acceptor: %s\n", acceptors[ret]);
+			t = ae_get_word(f);
+			for (i = 0; acceptors[i].name != NULL; i++) {
+				if (!strcmp(acceptors[i].name, t)) {
+					p->acceptor = acceptors[i].f;
+					break;
+				}
+			}
+			if (acceptors[i].name == NULL)
+				ae_err("Invalid acceptor: %s\n", t);
+			printf("sa_acceptor: %s\n", t);
+			free(t);
+			t = NULL;
 		} else if (!strcmp("schedule", s)) {
-			nobmask |= 32;
 			ret = ae_match_alternatives(schedules, f);
 			if (ret != 0)
 				ae_err("unknown sa schedule\n");
 			p->schedule = geometric_schedule;
 			p->schedule_param1 = ae_get_double(f);
 		} else if (!strcmp("heuristics", s)) {
-			nobmask |= 64;
 			ret = ae_match_alternatives(heuristics_names, f);
 			if (ret < 0)
 				ae_err("unknown sa heuristics\n");
 			ae_sa_set_heuristics(p, heuristics_names[ret]);
+		} else if (!strcmp("zero_transition_prob_enabled", s)) {
+			printf("sa zero_transition_probabity enabled\n");
+			p->ztpset = 1;
 		} else if (!strcmp("zero_transition_prob", s)) {
 			double ztp = ae_get_double(f);
 			assert(ztp >= 0.0 && ztp <= 1.0);
@@ -360,8 +387,6 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f)
 		free(s);
 		s = NULL;
 	}
-
-	assert(nobmask == 127);
 
 	free(heuristics_names);
 

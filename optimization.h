@@ -39,7 +39,7 @@ struct ae_optimization {
 
 struct ae_optimization *ae_create_optimization_context(void);
 struct ae_mapping *ae_optimize(struct ae_mapping *map);
-void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f);
+void ae_read_optimization_parameters(struct ae_mapping *map, FILE *f);
 
 void append_optstate_move(struct optstate *os, double old, double new);
 double cost_diff(double old, double new);

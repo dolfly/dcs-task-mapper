@@ -60,8 +60,6 @@ enum optmethod {
 	OPT_GROUP_MIGRATION_2,
 	OPT_GROUP_MIGRATION_RANDOM,
 	OPT_GENETIC_ALGORITHM,
-	OPT_SIMULATED_ANNEALING_AUTOTEMP_2,
-	OPT_SIMULATED_ANNEALING_AUTOTEMP_3,
 	OPT_BRUTE_FORCE,
 	OPT_OSM_SA,
 	OPT_SIMULATED_ANNEALING_LEVELS,
@@ -91,8 +89,6 @@ static const struct optmethods optmethods[] = {
 	{"group_migration_2", OPT_GROUP_MIGRATION_2},
 	{"group_migration_random", OPT_GROUP_MIGRATION_RANDOM},
 	{"genetic_algorithm", OPT_GENETIC_ALGORITHM},
-	{"simulated_annealing_autotemp2", OPT_SIMULATED_ANNEALING_AUTOTEMP_2},
-	{"simulated_annealing_autotemp3", OPT_SIMULATED_ANNEALING_AUTOTEMP_3},
 	{"brute_force", OPT_BRUTE_FORCE},
 	{"osm_sa", OPT_OSM_SA},
 	{"simulated_annealing_levels", OPT_SIMULATED_ANNEALING_LEVELS},
@@ -368,15 +364,15 @@ static struct ae_mapping *osm(struct ae_mapping *map, double initial)
 	return ae_osm(map, osmparams);
 }
 
-static struct osm_sa_parameters *read_osm_sa_parameters(FILE *f)
+static struct osm_sa_parameters *read_osm_sa_parameters(FILE *f, struct ae_mapping *map)
 {
 	struct osm_sa_parameters *params;
 	MALLOC_ARRAY(params, 1);
 
 	params->osm = ae_osm_read_parameters(f);
 
-	params->sa = ae_sa_read_parameters(f);
-	params->sa->autotemp = 1;
+	params->sa = ae_sa_read_parameters(f, map);
+	params->sa->autotemp_mode = AE_SA_AUTOTEMP_OLD;
 
 	return params;
 }
@@ -420,7 +416,7 @@ static struct ae_mapping *sa(struct ae_mapping *map, double initial)
 	saparams->objective = opt->objective;
 	saparams->acceptor_param1 = initial / 2.0;
 
-	if (saparams->autotemp)
+	if (saparams->autotemp_mode)
 		ae_sa_autotemp(saparams, map);
 
 	T = saparams->T0;
@@ -432,31 +428,7 @@ static struct ae_mapping *sa(struct ae_mapping *map, double initial)
 		saparams->schedule_max = map->ntasks * (map->arch->npes - 1);
 
 	newmap = ae_sa(NULL, 0, map, T, saparams);
-
-	switch (saparams->autotemp) {
-	case 0:
-	case 1:
-		return newmap;
-
-	case 2:
-		/* Simulated annealing autotemp version 2 (50% more iterations) */
-		T = sqrt(saparams->T0 * saparams->Tf);
-		break;
-
-	case 3:
-		/* Simulated annealing autotemp version 3 (100% more iterations) */
-		T = saparams->T0;
-		break;
-
-	default:
-		ae_err("Unknown SA autotemp version: %d\n", saparams->autotemp);
-	}
-
-	map = ae_sa(NULL, 0, newmap, T, saparams);
-
-	ae_free_mapping(newmap);
-
-	return map;
+	return newmap;
 }
 
 /* Highest objective first */
@@ -596,8 +568,9 @@ struct ae_mapping *ae_optimize(struct ae_mapping *map)
 }
 
 
-void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f)
+void ae_read_optimization_parameters(struct ae_mapping *map, FILE *f)
 {
+	struct ae_optimization *opt = map->optimization;
 	char *objectives[] = {"execution_time",       /* 0 */
 			      "execution_time_power", /* 1 */
 			      NULL};
@@ -652,39 +625,39 @@ void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f)
 		break;
 	case OPT_SIMULATED_ANNEALING:
 		opt->method = sa;
-		opt->params = ae_sa_read_parameters(f);
+		opt->params = ae_sa_read_parameters(f, map);
 		break;
 	case OPT_SIMULATED_ANNEALING_AUTOTEMP:
 		opt->method = sa;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
+		opt->params = ae_sa_read_parameters(f, map);
+		((struct ae_sa_parameters *) opt->params)->autotemp_mode = AE_SA_AUTOTEMP_OLD;
 		break;
 	case OPT_FAST_HYBRID_GM_SA:
 		opt->method = fast_hybrid_gm_sa;
-		opt->params = ae_sa_read_parameters(f);
+		opt->params = ae_sa_read_parameters(f, map);
 		break;
 	case OPT_FAST_HYBRID_GM_SA_AUTOTEMP:
 		opt->method = fast_hybrid_gm_sa;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
+		opt->params = ae_sa_read_parameters(f, map);
+		((struct ae_sa_parameters *) opt->params)->autotemp_mode = AE_SA_AUTOTEMP_OLD;
 		break;
 	case OPT_SLOW_HYBRID_GM_SA:
 		opt->method = slow_hybrid_gm_sa;
-		opt->params = ae_sa_read_parameters(f);
+		opt->params = ae_sa_read_parameters(f, map);
 		break;
 	case OPT_SLOW_HYBRID_GM_SA_AUTOTEMP:
 		opt->method = slow_hybrid_gm_sa;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
+		opt->params = ae_sa_read_parameters(f, map);
+		((struct ae_sa_parameters *) opt->params)->autotemp_mode = AE_SA_AUTOTEMP_OLD;
 		break;
 	case OPT_ITERATED_SIMULATED_ANNEALING:
 		opt->method = iterated_sa;
-		opt->params = ae_sa_read_parameters(f);
+		opt->params = ae_sa_read_parameters(f, map);
 		break;
 	case OPT_ITERATED_SIMULATED_ANNEALING_AUTOTEMP:
 		opt->method = iterated_sa;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
+		opt->params = ae_sa_read_parameters(f, map);
+		((struct ae_sa_parameters *) opt->params)->autotemp_mode = AE_SA_AUTOTEMP_OLD;
 		break;
 	case OPT_GROUP_MIGRATION_2:
 		opt->method = gm2;
@@ -696,27 +669,17 @@ void ae_read_optimization_parameters(struct ae_optimization *opt, FILE *f)
 		opt->method = genetic_algorithm;
 		opt->params = ae_ga_read_parameters(f);
 		break;
-	case OPT_SIMULATED_ANNEALING_AUTOTEMP_2:
-		opt->method = sa;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 2;
-		break;
-	case OPT_SIMULATED_ANNEALING_AUTOTEMP_3:
-		opt->method = sa;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 3;
-		break;
 	case OPT_BRUTE_FORCE:
 		opt->method = brute_force;
 		break;
 	case OPT_OSM_SA:
 		opt->method = osm_sa;
-		opt->params = read_osm_sa_parameters(f);
+		opt->params = read_osm_sa_parameters(f, map);
 		break;
 	case OPT_SIMULATED_ANNEALING_LEVELS:
 		opt->method = sa_with_levels;
-		opt->params = ae_sa_read_parameters(f);
-		((struct ae_sa_parameters *) opt->params)->autotemp = 1;
+		opt->params = ae_sa_read_parameters(f, map);
+		((struct ae_sa_parameters *) opt->params)->autotemp_mode = AE_SA_AUTOTEMP_OLD;
 		break;
 	case OPT_NEIGHBORHOOD_TEST:
 		opt->method = ae_neighborhood_test_mapping;

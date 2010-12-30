@@ -390,16 +390,17 @@ struct ae_mapping *ae_read_input(FILE *f)
 			got_map = 1;
 			break;
 		case 2:
+			assert(got_arch);
+			map->arch = arch;
+			assert(got_map);
 			assert(got_opt == 0);
-			ae_read_optimization_parameters(map->optimization, f);
+			ae_read_optimization_parameters(map, f);
 			got_opt = 1;
 			break;
 		default:
 			ae_err("very unexpected error in ae_read_input\n");
 		}
 	}
-
-	map->arch = arch;
 
 	while ((ret = ae_match_alternatives(extras, f)) != -2) {
 		switch (ret) {
