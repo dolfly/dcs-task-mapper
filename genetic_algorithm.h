@@ -11,16 +11,6 @@ struct individual {
 	struct ae_mapping *map;
 };
 
-enum crossover_method {
-	SINGLE_POINT_CO = 0, /* 0 */
-	TWO_POINT_CO,        /* 1 */
-	UNIFORM_CO,          /* 2 */
-	ARITHMETIC_CO,       /* 3 */
-	CONSENSUS_CO,        /* 4 */
-	CONSENSUS_2_CO,      /* 5 */
-	GA_CO_LIMIT
-};
-
 struct ga_parameters {
 	size_t max_generations;
 	size_t population_size;
@@ -28,7 +18,7 @@ struct ga_parameters {
 	size_t discrimination;
 
 	double crossover_probability;
-	enum crossover_method crossover_method;
+	const char *crossover_method;
 	double chromosome_mutation_probability;
 	double gene_mutation_probability;
 

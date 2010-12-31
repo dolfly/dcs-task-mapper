@@ -25,6 +25,7 @@
 #include "arexbasic.h"
 #include "input.h"
 #include "result.h"
+#include "support.h"
 
 #include <string.h>
 #include <assert.h>
@@ -445,15 +446,42 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 	return S_best;
 }
 
+static void set_crossover_method(struct ga_parameters *p, const char *name)
+{
+	int i;
+	const struct {
+		const char *name;
+		void (*f)(struct individual *child, struct individual *parent1, struct individual *parent2);
+	} crossmethods[] = {{"uniform", uniform_co},
+			    {"single_point", single_point_co},
+			    {"two_point", two_point_co},
+			    {"arithmetic", arithmetic_co},
+			    {"consensus", consensus_co},
+			    {"consensus_2", consensus_2_co},
+			    {NULL, NULL},
+			   };
+
+	name = xstrdup(name);
+	for (i = 0; crossmethods[i].name != NULL; i++) {
+		if (!strcmp(name, crossmethods[i].name)) {
+			p->crossoverbits = crossmethods[i].f;
+			break;
+		}
+	}
+	if (crossmethods[i].name == NULL)
+		ae_err("Unknown crossover method: %s\n", name);
+	p->crossover_method = name;
+}
 
 struct ga_parameters *ae_ga_read_parameters(FILE *f)
 {
 	struct ga_parameters *p;
 	int i;
 	char *s;
+	char *t;
 
 	struct valuepair {
-		char *name;
+		const char *name;
 		double value;
 		int initialized;
 	};
@@ -466,12 +494,13 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 		{.name = "crossover_probability",           .value = 1.0},
 		{.name = "chromosome_mutation_probability", .value = 1.0},
 		{.name = "gene_mutation_probability",       .value = 0.01},
-		{.name = "crossover_method",                .value = (double) UNIFORM_CO},
 		{.name = NULL}};
 
 	int nparameters = sizeof(pars) / sizeof(struct valuepair) - 1;
 
 	CALLOC_ARRAY(p, 1);
+
+	set_crossover_method(p, "uniform");
 
 	/* I should really write a generic handler for these situations where
 	   we have set of named operands for an algorithm. We could re-use it
@@ -482,6 +511,16 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 		if (strcmp(s, "end_method") == 0)
 			break;
 
+		if (!strcmp(s, "crossover_method")) {
+			t = ae_get_word(f);
+			set_crossover_method(p, t);
+			free(t);
+			t = NULL;
+			free(s);
+			s = NULL;
+			continue;
+		}
+
 		for (i = 0; pars[i].name != NULL; i++) {
 			if (strcmp(s, pars[i].name) != 0)
 				continue;
@@ -491,6 +530,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 		}
 
 		free(s);
+		s = NULL;
 	}
 
 	for (i = 0; pars[i].name != NULL; i++) {
@@ -499,7 +539,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	}
 
 	/* Command line parameter format is:
-	   (a, b, c, d, e, f, g, h), where
+	   (a, b, c, d, e, f, g), where
 	   a = max_generations,
 	   b = population_size,
 	   c = elitism,
@@ -507,7 +547,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	   e = crossover_probability,
 	   f = chromosome_mutation_probability,
 	   g = gene_mutation_probability,
-	   h = crossover_method */
+	 */
 
 	s = ae_config.cmdline_optimization_parameter;
 
@@ -532,7 +572,6 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	p->crossover_probability = pars[4].value;
 	p->chromosome_mutation_probability = pars[5].value;
 	p->gene_mutation_probability = pars[6].value;
-	p->crossover_method = (enum crossover_method) pars[7].value;
 
 	assert(p->max_generations > 0);
 	assert(p->population_size > 0);
@@ -546,28 +585,6 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	   for each */
 	p->mutation = mutation;
 	p->crossover = crossover;
-	switch (p->crossover_method) {
-	case SINGLE_POINT_CO:
-		p->crossoverbits = single_point_co;
-		break;
-	case TWO_POINT_CO:
-		p->crossoverbits = two_point_co;
-		break;
-	case UNIFORM_CO:
-		p->crossoverbits = uniform_co;
-		break;
-	case ARITHMETIC_CO:
-		p->crossoverbits = arithmetic_co;
-		break;
-	case CONSENSUS_CO:
-		p->crossoverbits = consensus_co;
-		break;
-	case CONSENSUS_2_CO:
-		p->crossoverbits = consensus_2_co;
-		break;
-	default:
-		ae_err("Invalid crossover enum: %d\n", p->crossover_method);
-	}
 
 	printf("GA parameters:\n"
 	       "max_generations: %zu\n"
@@ -575,7 +592,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	       "elitism: %zu\n"
 	       "discrimination: %zu\n"
 	       "crossover_probability: %.6f\n"
-	       "crossover_method: %d\n"
+	       "crossover_method: %s\n"
 	       "chromosome_mutation_probability: %.6f\n"
 	       "gene_mutation_probability: %.6f\n",
 	       p->max_generations, p->population_size, p->elitism,
