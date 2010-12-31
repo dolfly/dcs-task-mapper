@@ -284,7 +284,7 @@ struct ae_sa_parameters *ae_sa_read_parameters(FILE *f, struct ae_mapping *map)
 	 */
 	struct {
 		const char *name;
-		void *f;
+		double (*f)(double dE, double T, struct ae_sa_parameters *params);
 	} acceptors[] = {{"exponential", inverse_exponential_acceptor},
 			 {"invexp", inverse_exponential_acceptor},
 			 {"exp", exponential_acceptor},
