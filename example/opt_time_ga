@@ -2,8 +2,9 @@ optimization
 	objective_function	execution_time
 	method genetic_algorithm
                 max_generations                 1000
+		stop_generations		200
                 population_size                 100
-                elitism                         0
+                elitism                         1
 		discrimination			0
 		crossover_probability           1.0
 		chromosome_mutation_probability 1.0
