@@ -366,6 +366,7 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 	struct ae_mapping *S_best;
 	double S_best_cost;
 	double gini;
+	size_t bestfoundsince = 0;
 
 	S_best = ae_fork_mapping(S0);
 	S_best_cost = p->objective(S_best);
@@ -377,14 +378,19 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 
 	MALLOC_ARRAY(selection_probability, p->population_size);
 
-	/* START! */
 	for (generation = 0; generation < p->max_generations; generation++) {
 
 		qsort(population, p->population_size, sizeof(population[0]), fittest_first);
 		if (fitness_to_cost(population[0]->fitness) < S_best_cost) {
 			ae_copy_mapping(S_best, population[0]->map);
 			S_best_cost = fitness_to_cost(population[0]->fitness);
+			bestfoundsince = 0;
+		} else {
+			bestfoundsince++;
 		}
+
+		if (p->stop_generations > 0 && bestfoundsince >= p->stop_generations)
+			break;
 
 		fitness_sum = 0.0;
 		best_fitness = 0.0;
@@ -488,6 +494,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 
 	struct valuepair pars[] = {
 		{.name = "max_generations",                 .value = 1000},
+		{.name = "stop_generations",                .value = 200},
 		{.name = "population_size",                 .value = 100},
 		{.name = "elitism",                         .value = 1},
 		{.name = "discrimination",                  .value = 1},
@@ -539,14 +546,15 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	}
 
 	/* Command line parameter format is:
-	   (a, b, c, d, e, f, g), where
+	   (a, b, c, d, e, f, g, h), where
 	   a = max_generations,
-	   b = population_size,
-	   c = elitism,
-	   d = discrimination,
-	   e = crossover_probability,
-	   f = chromosome_mutation_probability,
-	   g = gene_mutation_probability,
+	   b = stop_generations,
+	   c = population_size,
+	   d = elitism,
+	   e = discrimination,
+	   f = crossover_probability,
+	   g = chromosome_mutation_probability,
+	   h = gene_mutation_probability,
 	 */
 
 	s = ae_config.cmdline_optimization_parameter;
@@ -566,14 +574,18 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	}
 
 	p->max_generations = pars[0].value;
-	p->population_size = pars[1].value;
-	p->elitism = pars[2].value;
-	p->discrimination = pars[3].value;
-	p->crossover_probability = pars[4].value;
-	p->chromosome_mutation_probability = pars[5].value;
-	p->gene_mutation_probability = pars[6].value;
+	p->stop_generations = pars[1].value;
+
+	p->population_size = pars[2].value;
+	p->elitism = pars[3].value;
+	p->discrimination = pars[4].value;
+
+	p->crossover_probability = pars[5].value;
+	p->chromosome_mutation_probability = pars[6].value;
+	p->gene_mutation_probability = pars[7].value;
 
 	assert(p->max_generations > 0);
+	assert(p->stop_generations >= 0);
 	assert(p->population_size > 0);
 	assert(p->elitism >= 0 && p->elitism <= p->population_size);
 	assert(p->discrimination >= 0 && p->discrimination < p->population_size);
@@ -588,6 +600,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 
 	printf("GA parameters:\n"
 	       "max_generations: %zu\n"
+	       "stop_generations: %zu\n"
 	       "population_size: %zu\n"
 	       "elitism: %zu\n"
 	       "discrimination: %zu\n"
@@ -595,8 +608,8 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	       "crossover_method: %s\n"
 	       "chromosome_mutation_probability: %.6f\n"
 	       "gene_mutation_probability: %.6f\n",
-	       p->max_generations, p->population_size, p->elitism,
-	       p->discrimination,
+	       p->max_generations, p->stop_generations,
+	       p->population_size, p->elitism, p->discrimination,
 	       p->crossover_probability, p->crossover_method,
 	       p->chromosome_mutation_probability, p->gene_mutation_probability);
 	return p;
