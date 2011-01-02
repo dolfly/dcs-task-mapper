@@ -5,6 +5,34 @@ $ make
 
 This produces an executable file name ./taskmapper
 
+== Definitions ==
+
+Objective function: Objective function defines the goodness of a solution
+by a value often simply referred to as 'objective'. The objective must
+be a positive value. Taskmapper tries to find an optimum solution that has
+the smallest possible objective, that is, the lower the better.
+Optimization means finding a minimum value for the objective.
+Objective is often the execution time of the application that is being mapped.
+
+PE: A processing element is a processor that executes tasks. It is assumed
+that PE memory spaces are separate. Message passing is needed to share
+data among different PEs.
+
+Task: Task is the basic unit of mapping. Each task is located on a PE
+that executes it. Task consists of instructions.  Instruction can not
+be interrupted while it is executed, unless the instruction blocks for
+communication. A PE may execute only one instruction at a time.
+
+Interconnect: Interconnect is a communication channel used to relay
+messages between tasks that are located on different PEs.
+
+Schedule: Schedule is a time table of tasks being executed on a set of PEs.
+Schedule yields the execution time of the application. Scheduling is a
+process of determining the schedule - the time table of executing tasks.
+
+Mapping: Mapping means determining the placement of tasks onto PEs.
+Taskmapper places tasks on PEs to minimize the objective.
+
 == Examples ==
 
 Task mapper reads input from standard input and produces results onto
@@ -18,7 +46,7 @@ The input format consists of three sections:
 
 The input can be generated from examples by a following shell pattern:
 $ cd examples
-$ cat arch-b-dd kpn-cyclic-32-1 opt_time_sa_autotemp |../taskmapper 2>/dev/null
+$ cat arch-b-dd kpn-cyclic-32-1 opt_time_sa_autotemp |../taskmapper
 
 The first argument to 'cat' command is the architecture file. The second
 is a Kahn Process Network (task graph), and the third is the
@@ -32,17 +60,22 @@ testing.
 Optimize a 32 node task graph onto 2 PEs with Simulated Annealing:
 
 $ cd example
-$ cat 32-node-kpn-2-pe-sa-autotemp.job |../taskmapper 2>/dev/null
+$ cat example-arch-b-dd-kpn-cyclic-32-1-sa-autotemp.job |../taskmapper
 
 This should run to completion in a few seconds.
 
-The files 32-node-kpn-2-pe-brute-force.{job|result} contains
-the same problem but optimzied with brute force. Th runs a very
-long time, maybe a week or so. The result file contains the
-global optimum reference value for gain (which is the speedup of
-the optimized application). The optimal gain is approximately 1.635.
-SA has converged to the global optimum if the output contains the
-following line: "gain: 1.635"
+The file example-arch-b-dd-kpn-cyclic-32-1-brute-force.job contains
+the same problem but optimized with brute force.  File
+example-arch-b-dd-kpn-cyclic-32-1-brute-force.result contains the
+result (global optimum). Brute force runs a very long time, maybe a
+week or so. The result file contains the global optimum reference
+value, and the associated gain value. Gain value is defined the
+initial objective value divided by the best (smallest) objective
+value.  In this case gain is the same as speedup. For example, speedup
+value 2.0 means the application performance doubled in optimization.
+The optimal speedup for that particular example is approximately
+1.635. SA has converged to the global optimum if the output contains
+the following line: "gain: 1.635"
 
 The SA result is printed on the standard output. It should look
 something like this:
