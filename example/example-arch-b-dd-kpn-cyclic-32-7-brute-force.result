@@ -1,0 +1,141 @@
+pe: id 0 freq 300000000 perf 1.000000e+00 area 1.000000e-06
+pe: id 1 freq 300000000 perf 1.000000e+00 area 1.000000e-06
+interconnect: id 0 freq 200000000 area 2.000000e-07 width 32 latency 8 policy 0
+interconnect: id 1 freq 200000000 area 2.000000e-07 width 32 latency 8 policy 0
+kpn_insts: 752
+kpn_cycles: 262173
+kpn_bytes: 524239
+appmodel: kpn
+p: 1% i: 21474837 best_cost: 0.000555077 best_gain: 1.577
+p: 2% i: 42949673 best_cost: 0.000538215 best_gain: 1.627
+p: 3% i: 64424510 best_cost: 0.000538215 best_gain: 1.627
+p: 4% i: 85899346 best_cost: 0.000538215 best_gain: 1.627
+p: 5% i: 107374183 best_cost: 0.000538215 best_gain: 1.627
+p: 6% i: 128849019 best_cost: 0.000538215 best_gain: 1.627
+p: 7% i: 150323856 best_cost: 0.000529937 best_gain: 1.652
+p: 8% i: 171798692 best_cost: 0.000529937 best_gain: 1.652
+p: 9% i: 193273529 best_cost: 0.000529937 best_gain: 1.652
+p: 10% i: 214748365 best_cost: 0.000529937 best_gain: 1.652
+p: 11% i: 236223202 best_cost: 0.000529937 best_gain: 1.652
+p: 12% i: 257698038 best_cost: 0.000529937 best_gain: 1.652
+p: 13% i: 279172875 best_cost: 0.000529937 best_gain: 1.652
+p: 14% i: 300647711 best_cost: 0.000529937 best_gain: 1.652
+p: 15% i: 322122548 best_cost: 0.000529937 best_gain: 1.652
+p: 16% i: 343597384 best_cost: 0.000529937 best_gain: 1.652
+p: 17% i: 365072221 best_cost: 0.000529937 best_gain: 1.652
+p: 18% i: 386547057 best_cost: 0.000529937 best_gain: 1.652
+p: 19% i: 408021894 best_cost: 0.000529937 best_gain: 1.652
+p: 20% i: 429496730 best_cost: 0.000529937 best_gain: 1.652
+p: 21% i: 450971567 best_cost: 0.000529937 best_gain: 1.652
+p: 22% i: 472446403 best_cost: 0.000529937 best_gain: 1.652
+p: 23% i: 493921240 best_cost: 0.000529937 best_gain: 1.652
+p: 24% i: 515396076 best_cost: 0.000529937 best_gain: 1.652
+p: 25% i: 536870912 best_cost: 0.000529937 best_gain: 1.652
+p: 26% i: 558345749 best_cost: 0.000529937 best_gain: 1.652
+p: 27% i: 579820585 best_cost: 0.000529937 best_gain: 1.652
+p: 28% i: 601295422 best_cost: 0.000529937 best_gain: 1.652
+p: 29% i: 622770258 best_cost: 0.000529937 best_gain: 1.652
+p: 30% i: 644245095 best_cost: 0.000529937 best_gain: 1.652
+p: 31% i: 665719931 best_cost: 0.000529937 best_gain: 1.652
+p: 32% i: 687194768 best_cost: 0.000529937 best_gain: 1.652
+p: 33% i: 708669604 best_cost: 0.000529937 best_gain: 1.652
+p: 34% i: 730144441 best_cost: 0.000529937 best_gain: 1.652
+p: 35% i: 751619277 best_cost: 0.000529937 best_gain: 1.652
+p: 36% i: 773094114 best_cost: 0.000529937 best_gain: 1.652
+p: 37% i: 794568950 best_cost: 0.000529937 best_gain: 1.652
+p: 38% i: 816043787 best_cost: 0.000529937 best_gain: 1.652
+p: 39% i: 837518623 best_cost: 0.000529937 best_gain: 1.652
+p: 40% i: 858993460 best_cost: 0.000529937 best_gain: 1.652
+p: 41% i: 880468296 best_cost: 0.000529937 best_gain: 1.652
+p: 42% i: 901943133 best_cost: 0.000529937 best_gain: 1.652
+p: 43% i: 923417969 best_cost: 0.000529937 best_gain: 1.652
+p: 44% i: 944892806 best_cost: 0.000529937 best_gain: 1.652
+p: 45% i: 966367642 best_cost: 0.000529937 best_gain: 1.652
+p: 46% i: 987842479 best_cost: 0.000529937 best_gain: 1.652
+p: 47% i: 1009317315 best_cost: 0.000529937 best_gain: 1.652
+p: 48% i: 1030792152 best_cost: 0.000529937 best_gain: 1.652
+p: 49% i: 1052266988 best_cost: 0.000529937 best_gain: 1.652
+p: 50% i: 1073741824 best_cost: 0.000529937 best_gain: 1.652
+p: 51% i: 1095216661 best_cost: 0.000529937 best_gain: 1.652
+p: 52% i: 1116691497 best_cost: 0.000529937 best_gain: 1.652
+p: 53% i: 1138166334 best_cost: 0.000529937 best_gain: 1.652
+p: 54% i: 1159641170 best_cost: 0.000529937 best_gain: 1.652
+p: 55% i: 1181116007 best_cost: 0.000529937 best_gain: 1.652
+p: 56% i: 1202590843 best_cost: 0.000529937 best_gain: 1.652
+p: 57% i: 1224065680 best_cost: 0.000529937 best_gain: 1.652
+p: 58% i: 1245540516 best_cost: 0.000529937 best_gain: 1.652
+p: 59% i: 1267015353 best_cost: 0.000529937 best_gain: 1.652
+p: 60% i: 1288490189 best_cost: 0.000529937 best_gain: 1.652
+p: 61% i: 1309965026 best_cost: 0.000529937 best_gain: 1.652
+p: 62% i: 1331439862 best_cost: 0.000529937 best_gain: 1.652
+p: 63% i: 1352914699 best_cost: 0.000529937 best_gain: 1.652
+p: 64% i: 1374389535 best_cost: 0.000529937 best_gain: 1.652
+p: 65% i: 1395864372 best_cost: 0.000529937 best_gain: 1.652
+p: 66% i: 1417339208 best_cost: 0.000529937 best_gain: 1.652
+p: 67% i: 1438814045 best_cost: 0.000529937 best_gain: 1.652
+p: 68% i: 1460288881 best_cost: 0.000529937 best_gain: 1.652
+p: 69% i: 1481763718 best_cost: 0.000529937 best_gain: 1.652
+p: 70% i: 1503238554 best_cost: 0.000529937 best_gain: 1.652
+p: 71% i: 1524713391 best_cost: 0.000529937 best_gain: 1.652
+p: 72% i: 1546188227 best_cost: 0.000529937 best_gain: 1.652
+p: 73% i: 1567663064 best_cost: 0.000529937 best_gain: 1.652
+p: 74% i: 1589137900 best_cost: 0.000529937 best_gain: 1.652
+p: 75% i: 1610612736 best_cost: 0.000529937 best_gain: 1.652
+p: 76% i: 1632087573 best_cost: 0.000529937 best_gain: 1.652
+p: 77% i: 1653562409 best_cost: 0.000529937 best_gain: 1.652
+p: 78% i: 1675037246 best_cost: 0.000529937 best_gain: 1.652
+p: 79% i: 1696512082 best_cost: 0.000529937 best_gain: 1.652
+p: 80% i: 1717986919 best_cost: 0.000529937 best_gain: 1.652
+p: 81% i: 1739461755 best_cost: 0.000529937 best_gain: 1.652
+p: 82% i: 1760936592 best_cost: 0.000529937 best_gain: 1.652
+p: 83% i: 1782411428 best_cost: 0.000529937 best_gain: 1.652
+p: 84% i: 1803886265 best_cost: 0.000529937 best_gain: 1.652
+p: 85% i: 1825361101 best_cost: 0.000529937 best_gain: 1.652
+p: 86% i: 1846835938 best_cost: 0.000529937 best_gain: 1.652
+p: 87% i: 1868310774 best_cost: 0.000529937 best_gain: 1.652
+p: 88% i: 1889785611 best_cost: 0.000529937 best_gain: 1.652
+p: 89% i: 1911260447 best_cost: 0.000529937 best_gain: 1.652
+p: 90% i: 1932735284 best_cost: 0.000529937 best_gain: 1.652
+p: 91% i: 1954210120 best_cost: 0.000529937 best_gain: 1.652
+p: 92% i: 1975684957 best_cost: 0.000529937 best_gain: 1.652
+p: 93% i: 1997159793 best_cost: 0.000529937 best_gain: 1.652
+p: 94% i: 2018634630 best_cost: 0.000529937 best_gain: 1.652
+p: 95% i: 2040109466 best_cost: 0.000529937 best_gain: 1.652
+p: 96% i: 2061584303 best_cost: 0.000529937 best_gain: 1.652
+p: 97% i: 2083059139 best_cost: 0.000529937 best_gain: 1.652
+p: 98% i: 2104533976 best_cost: 0.000529937 best_gain: 1.652
+p: 99% i: 2126008812 best_cost: 0.000529937 best_gain: 1.652
+noptimums: 1
+optimumiteration: 146777270 (6%)
+objective_function: execution_time
+power_k: 0.000000e+00
+optimization_method: brute_force
+sa_heuristics: None
+sa_schedule_max: -1
+sa_max_rejects: -1
+sa_zero_transition_prob: -1.000000e+00
+ntasks: 32
+pes: 2
+pe_utilisations: 1.000 0.979 
+total_pe_utilisation: 0.990
+ic_utilisations: 0.119 0.007 
+total_ic_utilisation: 0.063
+mapping_list 32 map 0 0 map 1 0 map 2 1 map 3 1 map 4 0 map 5 1 map 6 1 map 7 0 map 8 1 map 9 0 map 10 0 map 11 1 map 12 0 map 13 0 map 14 1 map 15 0 map 16 1 map 17 1 map 18 1 map 19 1 map 20 1 map 21 1 map 22 1 map 23 0 map 24 1 map 25 0 map 26 0 map 27 0 map 28 1 map 29 0 map 30 0 map 31 0 
+changed_mappings: 16
+balance: 0.500 0.500 
+data_file: 
+initial_objective: 0.000875563
+initial_time: 0.000875563
+best_objective: 0.000529937
+best_time: 0.000529937
+gain: 1.652
+time_gain: 1.652
+static_energy: 3.815544e-01
+dynamic_energy: 0.000000e+00
+static_energy_proportion: 1.000
+total_energy: 3.815544e-01
+area: 2.400000e-06
+evaluations: 2147483651
+optimization_time: 668343.888882
+optimization_started: 2010-08-23 20:50:59
+optimization_ended: 2010-08-31 14:41:52
