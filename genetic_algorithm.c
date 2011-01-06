@@ -419,8 +419,7 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 		gini = gini_coefficient(selection_probability, p->population_size);
 
 		printf("best_ga_cost_so_far: %.9f %.3f %zd %lld %.3f\n",
-		       fitness_to_cost(best_fitness),
-		       p->initial_cost / fitness_to_cost(best_fitness),
+		       S_best_cost, p->initial_cost / S_best_cost,
 		       generation, S0->result->evals - initialevals, gini);
 
 		/* Elitism: select elite automatically to the next generation
