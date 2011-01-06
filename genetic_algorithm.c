@@ -366,7 +366,9 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 	struct ae_mapping *S_best;
 	double S_best_cost;
 	double gini;
-	size_t bestfoundsince = 0;
+	size_t bestfoundsincegenerations = 0;
+	long long initialevals = S0->result->evals;
+	long long besteval = S0->result->evals;
 
 	S_best = ae_fork_mapping(S0);
 	S_best_cost = p->objective(S_best);
@@ -378,18 +380,26 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 
 	MALLOC_ARRAY(selection_probability, p->population_size);
 
-	for (generation = 0; generation < p->max_generations; generation++) {
+	for (generation = 0;; generation++) {
+		if (p->max_generations > 0 && generation >= p->max_generations)
+			break;
+		if (p->max_evaluations > 0 && (S0->result->evals - initialevals) >= p->max_evaluations)
+			break;
 
 		qsort(population, p->population_size, sizeof(population[0]), fittest_first);
 		if (fitness_to_cost(population[0]->fitness) < S_best_cost) {
 			ae_copy_mapping(S_best, population[0]->map);
 			S_best_cost = fitness_to_cost(population[0]->fitness);
-			bestfoundsince = 0;
+			bestfoundsincegenerations = 0;
+			besteval = S0->result->evals;
 		} else {
-			bestfoundsince++;
+			bestfoundsincegenerations++;
 		}
 
-		if (p->stop_generations > 0 && bestfoundsince >= p->stop_generations)
+		if (p->stop_generations > 0 && bestfoundsincegenerations >= p->stop_generations)
+			break;
+
+		if (p->stop_evaluations > 0 && (S0->result->evals >= (besteval + p->stop_evaluations)))
 			break;
 
 		fitness_sum = 0.0;
@@ -411,7 +421,7 @@ struct ae_mapping *ae_genetic_algorithm(struct ae_mapping *S0,
 		printf("best_ga_cost_so_far: %.9f %.3f %zd %lld %.3f\n",
 		       fitness_to_cost(best_fitness),
 		       p->initial_cost / fitness_to_cost(best_fitness),
-		       generation, S0->result->evals, gini);
+		       generation, S0->result->evals - initialevals, gini);
 
 		/* Elitism: select elite automatically to the next generation
 		   (the population is already in sorted order) */
@@ -482,30 +492,22 @@ static void set_crossover_method(struct ga_parameters *p, const char *name)
 struct ga_parameters *ae_ga_read_parameters(FILE *f)
 {
 	struct ga_parameters *p;
-	int i;
 	char *s;
 	char *t;
 
-	struct valuepair {
-		const char *name;
-		double value;
-		int initialized;
-	};
-
-	struct valuepair pars[] = {
-		{.name = "max_generations",                 .value = 1000},
-		{.name = "stop_generations",                .value = 200},
-		{.name = "population_size",                 .value = 100},
-		{.name = "elitism",                         .value = 1},
-		{.name = "discrimination",                  .value = 1},
-		{.name = "crossover_probability",           .value = 1.0},
-		{.name = "chromosome_mutation_probability", .value = 1.0},
-		{.name = "gene_mutation_probability",       .value = 0.01},
-		{.name = NULL}};
-
-	int nparameters = sizeof(pars) / sizeof(struct valuepair) - 1;
-
 	CALLOC_ARRAY(p, 1);
+
+	/* Set default values */
+	assert(ae_input_key_size_t(&p->max_generations, "max_generations", "max_generations", "1000", NULL));
+	assert(ae_input_key_size_t(&p->stop_generations, "stop_generations", "stop_generations", "200", NULL));
+	assert(ae_input_key_size_t(&p->max_evaluations, "max_evaluations", "max_evaluations", "0", NULL));
+	assert(ae_input_key_size_t(&p->stop_evaluations, "stop_evaluations", "stop_evaluations", "0", NULL));
+	assert(ae_input_key_size_t(&p->population_size, "population_size", "population_size", "100", NULL));
+	assert(ae_input_key_size_t(&p->elitism, "elitism", "elitism", "1", NULL));
+	assert(ae_input_key_size_t(&p->discrimination, "discrimination", "discrimination", "1", NULL));
+	assert(ae_input_key_double(&p->crossover_probability, "crossover_probability", "crossover_probability", "1.0", NULL));
+	assert(ae_input_key_double(&p->chromosome_mutation_probability, "chromosome_mutation_probability", "chromosome_mutation_probability", "1.0", NULL));
+	assert(ae_input_key_double(&p->gene_mutation_probability, "gene_mutation_probability", "gene_mutation_probability", "0.01", NULL));
 
 	set_crossover_method(p, "uniform");
 
@@ -515,77 +517,45 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 
 	while (1) {
 		s = ae_get_word(f);
-		if (strcmp(s, "end_method") == 0)
+		if (ae_input_is_key(NULL, "end_method", s))
 			break;
-
-		if (!strcmp(s, "crossover_method")) {
-			t = ae_get_word(f);
+		if (ae_input_key_string(&t, "crossover_method", s, NULL, f)) {
 			set_crossover_method(p, t);
 			free(t);
 			t = NULL;
-			free(s);
-			s = NULL;
-			continue;
+			goto parameterhandled;
 		}
+		if (ae_input_key_size_t(&p->max_generations, "max_generations", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_size_t(&p->stop_generations, "stop_generations", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_size_t(&p->max_evaluations, "max_evaluations", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_size_t(&p->stop_evaluations, "stop_evaluations", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_size_t(&p->population_size, "population_size", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_size_t(&p->elitism, "elitism", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_size_t(&p->discrimination, "discrimination", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_double(&p->crossover_probability, "crossover_probability", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_double(&p->chromosome_mutation_probability, "chromosome_mutation_probability", s, NULL, f))
+			goto parameterhandled;
+		if (ae_input_key_double(&p->gene_mutation_probability, "gene_mutation_probability", s, NULL, f))
+			goto parameterhandled;
+		ae_err("Unknown parameter: %s\n", s);
 
-		for (i = 0; pars[i].name != NULL; i++) {
-			if (strcmp(s, pars[i].name) != 0)
-				continue;
-
-			pars[i].value = ae_get_double(f);
-			pars[i].initialized = 1;
-		}
-
+	parameterhandled:
 		free(s);
 		s = NULL;
 	}
 
-	for (i = 0; pars[i].name != NULL; i++) {
-		if (!pars[i].initialized)
-			printf("warning: %s not initialized\n", pars[i].name);
-	}
+	if (p->max_generations == 0 && p->stop_generations == 0 &&
+	    p->max_evaluations == 0 && p->stop_evaluations == 0)
+		ae_err("GA termination condition not set\n");
 
-	/* Command line parameter format is:
-	   (a, b, c, d, e, f, g, h), where
-	   a = max_generations,
-	   b = stop_generations,
-	   c = population_size,
-	   d = elitism,
-	   e = discrimination,
-	   f = crossover_probability,
-	   g = chromosome_mutation_probability,
-	   h = gene_mutation_probability,
-	 */
-
-	s = ae_config.cmdline_optimization_parameter;
-
-	if (s) {
-		for (i = 0;; i++) {
-			char *end;
-			pars[i].value = strtod(s, &end);
-			if (i < (nparameters - 1)) {
-				assert(*end == ',');
-				s = end + 1;
-			} else {
-				assert(*end == 0);
-				break;
-			}
-		}
-	}
-
-	p->max_generations = pars[0].value;
-	p->stop_generations = pars[1].value;
-
-	p->population_size = pars[2].value;
-	p->elitism = pars[3].value;
-	p->discrimination = pars[4].value;
-
-	p->crossover_probability = pars[5].value;
-	p->chromosome_mutation_probability = pars[6].value;
-	p->gene_mutation_probability = pars[7].value;
-
-	assert(p->max_generations > 0);
-	assert(p->stop_generations >= 0);
 	assert(p->population_size > 0);
 	assert(p->elitism >= 0 && p->elitism <= p->population_size);
 	assert(p->discrimination >= 0 && p->discrimination < p->population_size);
@@ -601,6 +571,8 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	printf("GA parameters:\n"
 	       "max_generations: %zu\n"
 	       "stop_generations: %zu\n"
+	       "max_evaluations: %zu\n"
+	       "stop_evaluations: %zu\n"
 	       "population_size: %zu\n"
 	       "elitism: %zu\n"
 	       "discrimination: %zu\n"
@@ -609,6 +581,7 @@ struct ga_parameters *ae_ga_read_parameters(FILE *f)
 	       "chromosome_mutation_probability: %.6f\n"
 	       "gene_mutation_probability: %.6f\n",
 	       p->max_generations, p->stop_generations,
+	       p->max_evaluations, p->stop_evaluations,
 	       p->population_size, p->elitism, p->discrimination,
 	       p->crossover_probability, p->crossover_method,
 	       p->chromosome_mutation_probability, p->gene_mutation_probability);

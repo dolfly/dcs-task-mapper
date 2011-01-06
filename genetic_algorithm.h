@@ -15,6 +15,9 @@ struct ga_parameters {
 	size_t max_generations;
 	size_t stop_generations;
 
+	size_t max_evaluations;
+	size_t stop_evaluations;
+
 	size_t population_size;
 	size_t elitism;
 	size_t discrimination;

@@ -26,6 +26,13 @@ int ae_config_get_int(int *success, const char *name);
 long long ae_config_get_long_long(int *success, const char *name);
 size_t ae_config_get_size_t(int *success, const char *name);
 double ae_get_double(FILE *f);
+int ae_input_is_key(int *par, const char *expectedkey, const char *key);
+int ae_input_key_double(double *par, const char *expectedkey, const char *key,
+			const char *s, FILE *f);
+int ae_input_key_size_t(size_t *par, const char *expectedkey, const char *key,
+			const char *s, FILE *f);
+int ae_input_key_string(char **par, const char *expectedkey, const char *key,
+			const char *s, FILE *f);
 int ae_get_int(FILE *f);
 long long ae_get_long_long(FILE *f);
 unsigned int ae_get_uint(FILE *f);

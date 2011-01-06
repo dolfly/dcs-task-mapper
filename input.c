@@ -176,6 +176,57 @@ char *ae_get_word(FILE *f)
 	return s;
 }
 
+int ae_input_is_key(int *par, const char *expectedkey, const char *key)
+{
+	int ismatch = (strcmp(expectedkey, key) == 0);
+	if (par != NULL)
+		*par = ismatch;
+	return ismatch;
+}
+
+int ae_input_key_double(double *par, const char *expectedkey, const char *key,
+			const char *s, FILE *f)
+{
+	char *extra = NULL;
+	assert(s == NULL || f == NULL);
+	if (strcmp(expectedkey, key))
+		return 0;
+	if (s == NULL)
+		s = extra = ae_get_word(f);
+	if (sscanf(s, "%lf", par) != 1)
+		ae_err("Invalid value, expecting double for %s, got %s\n", expectedkey, s);
+	free(extra);
+	return 1;
+}
+
+int ae_input_key_size_t(size_t *par, const char *expectedkey, const char *key,
+			const char *s, FILE *f)
+{
+	char *extra = NULL;
+	char *end;
+	long long ll;
+	assert(s == NULL || f == NULL);
+	if (strcmp(expectedkey, key))
+		return 0;
+	if (s == NULL)
+		s = extra = ae_get_word(f);
+	ll = strtoll(s, &end, 10);
+	if (*end != 0 || ll < 0 || ll == LLONG_MAX)
+		ae_err("Invalid value, expecting unsigned integer for %s, got %s\n", expectedkey, s);
+	*par = ll;
+	free(extra);
+	return 1;
+}
+
+int ae_input_key_string(char **par, const char *expectedkey, const char *key,
+			const char *s, FILE *f)
+{
+	assert(s == NULL || f == NULL);
+	if (strcmp(expectedkey, key))
+		return 0;
+	*par = (s != NULL) ? xstrdup(s) : ae_get_word(f);
+	return 1;
+}
 
 /* matches alternative inputs from f. returns index of the match to the
    'alts' array. if there is no match due to EOF, -2 is returned. if there
