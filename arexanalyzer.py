@@ -399,8 +399,8 @@ def median(vector):
     l = len(v)
     assertion(l > 0, 'Zero length vector given for median.\n')
     if l % 2 == 0:
-        return 0.5 * (v[l / 2 - 1] + v[l / 2])
-    return v[l / 2]
+        return 0.5 * (v[l // 2 - 1] + v[l // 2])
+    return v[l // 2]
 
 
 def select_records(records, criteria):
